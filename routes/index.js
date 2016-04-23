@@ -32,4 +32,23 @@ router.post('/register', function(req, res, next) {
   });
 });
 
+/* POST login */
+router.post('/login', function(req, res, next) {
+  var username = req.body.username;
+  var password = req.body.password;
+  User.findOne({ username: username }, function(err, user) {
+    if (user === null) {
+      res.send({ success: false,
+                 message: 'Username or password is not correct' });
+    } else if (password == user.password) {
+      res.send({ success: true,
+                 message: 'The login info is good!' });
+    } else {
+      res.send({ success: false,
+                 message: 'Username or password is not correct' });
+    }
+  });
+});
+
+
 module.exports = router;
