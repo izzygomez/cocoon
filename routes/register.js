@@ -15,7 +15,7 @@ router.post('/', function(req, res, next) {
   var username = req.body.username;
   User.findOne({ 'username': username }, function(err, user) {
     if (user) {
-      res.send({ success: false, message: 'Username already exists!' });
+      res.render('register', { message: 'Username already exists!' });
     } else {
       var password = req.body.password;
       var confirm_password = req.body.confirm_password;
@@ -26,9 +26,9 @@ router.post('/', function(req, res, next) {
           password: bcrypt.hashSync(password, salt)
         });
         new_user.save();
-        res.send({ success: true, message: 'Registration successful!' });
+        res.render('index', { message: 'Registration successful!' });
       } else {
-        res.send({ success: false, message: 'The passwords don\'t match!' });
+        res.render('register', { message: 'The passwords don\'t match!' });
       }
     }
   });
