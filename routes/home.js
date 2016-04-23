@@ -8,3 +8,5 @@ var User = schemas.User;
 router.get('/', function(req, res) {
   res.render('home', { title: 'THE APP' });
 });
+
+module.exports = router;
