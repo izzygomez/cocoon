@@ -16,13 +16,11 @@ router.post('/', function(req, res, next) {
   var password = req.body.password;
   User.findOne({ username: username }, function(err, user) {
     if (user === null) {
-      res.send({ success: false,
-                 message: 'Username or password is not correct' });
+      res.render('login', { message: 'Username or password is not correct!' });
     } else if (bcrypt.compareSync(password, user.password)) {
       res.redirect('home');
     } else {
-      res.send({ success: false,
-                 message: 'Username or password is not correct' });
+      res.render('login', { message: 'Username or password is not correct!' });
     }
   });
 });
