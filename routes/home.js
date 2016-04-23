@@ -6,7 +6,7 @@ var User = schemas.User;
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('home', { title: 'THE APP' });
+  res.render('home', { title: 'Cocoon' });
 });
 
 module.exports = router;
