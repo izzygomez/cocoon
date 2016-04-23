@@ -17,15 +17,14 @@
       </div>
     </nav>
 
+    <h1>Login</h1>
+
     <p>{{ message }}</p>
 
-    <div id='inline_login'>
-      <p><strong>Login</strong></p>
-      <form method="post" action="/login">
-        <div>Username: <input type='text' placeholder='Username' class='login-username' name='username' required /></div>
-        <div>Password: <input type='password' placeholder='Password' class='login-password' name='password' required /></div>
-        <button type='submit' class='login-submit'>Login</button>
-      </form>
-    </div>
+    <form method="post" action="/login">
+      <div>Username: <input type='text' placeholder='Username' class='login-username' name='username' required /></div>
+      <div>Password: <input type='password' placeholder='Password' class='login-password' name='password' required /></div>
+      <button type='submit' class='login-submit'>Login</button>
+    </form>
   </body>
 </html>
