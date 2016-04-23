@@ -16,12 +16,12 @@
 
     <div id='inline_register'>
     <p><strong>Register</strong></p>
-      <div id='message'></div>
-      <div>Username: <input type='text' placeholder='Username' class='username' name='username' required /></div>
-      <div>Password: <input type='password' placeholder='Password' class='password' name='password' required /></div>
-      <div>Confirm Password: <input type='password' placeholder='Confirm Password' class='confirm-password' name='confirm_password' required /></div>
-      <button type='submit' class='register-submit'>Register</button>
+      <form method="post" action="/register">
+        <div>Username: <input type='text' placeholder='Username' class='username' name='username' required /></div>
+        <div>Password: <input type='password' placeholder='Password' class='password' name='password' required /></div>
+        <div>Confirm Password: <input type='password' placeholder='Confirm Password' class='confirm-password' name='confirm_password' required /></div>
+        <button type='submit' class='register-submit'>Register</button>
+      </form>
     </div>
-
   </body>
 </html>
