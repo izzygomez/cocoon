@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var schemas = require('../models/schemas');
+var bcrypt = require('bcryptjs');
+
 
 var User = schemas.User;
 
@@ -19,9 +21,10 @@ router.post('/register', function(req, res, next) {
       var password = req.body.password;
       var confirm_password = req.body.confirm_password;
       if (password === confirm_password) {
+        var salt = bcrypt.genSaltSync(10);
         var new_user = new User({
           username: username,
-          password: password
+          password: bcrypt.hashSync(password, salt)
         });
         new_user.save();
         res.send({ success: true, message: 'Registration successful!' });
@@ -40,7 +43,7 @@ router.post('/login', function(req, res, next) {
     if (user === null) {
       res.send({ success: false,
                  message: 'Username or password is not correct' });
-    } else if (password == user.password) {
+    } else if (bcrypt.compareSync(password, user.password)) {
       res.send({ success: true,
                  message: 'The login info is good!' });
     } else {

@@ -13,6 +13,7 @@
     "body-parser": "~1.0.0",
     "debug": "~0.7.4",
     "express-handlebars": "^2.0.1",
-    "mongoose": "~4.3.5"
+    "mongoose": "~4.3.5",
+    "bcryptjs": "~2.3.0"
   }
 }
