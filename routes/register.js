@@ -5,13 +5,13 @@ var bcrypt = require('bcryptjs');
 
 var User = schemas.User;
 
-/* GET home page. */
+/* GET register page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
+  res.render('register');
 });
 
 /* POST register */
-router.post('/register', function(req, res, next) {
+router.post('/', function(req, res, next) {
   var username = req.body.username;
   User.findOne({ 'username': username }, function(err, user) {
     if (user) {
@@ -34,21 +34,5 @@ router.post('/register', function(req, res, next) {
   });
 });
 
-/* POST login */
-router.post('/login', function(req, res, next) {
-  var username = req.body.username;
-  var password = req.body.password;
-  User.findOne({ username: username }, function(err, user) {
-    if (user === null) {
-      res.send({ success: false,
-                 message: 'Username or password is not correct' });
-    } else if (bcrypt.compareSync(password, user.password)) {
-      res.redirect('/home');
-    } else {
-      res.send({ success: false,
-                 message: 'Username or password is not correct' });
-    }
-  });
-});
 
 module.exports = router;

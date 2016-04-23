@@ -8,6 +8,8 @@ var exphbs = require('express-handlebars');
 var mongoose = require('mongoose');
 
 var routes = require('./routes/index');
+var register = require('./routes/register');
+var login = require('./routes/login');
 var users = require('./routes/users');
 var home = require('./routes/home');
 
@@ -34,6 +36,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
+app.use('/register', register)
+app.use('/login', login)
 app.use('/users', users);
 app.use('/home', home);
 
