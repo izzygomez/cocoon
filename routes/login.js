@@ -19,8 +19,7 @@ router.post('/', function(req, res, next) {
       res.send({ success: false,
                  message: 'Username or password is not correct' });
     } else if (bcrypt.compareSync(password, user.password)) {
-      res.send({ success: true,
-                 message: 'The login info is good!' });
+      res.redirect('home');
     } else {
       res.send({ success: false,
                  message: 'Username or password is not correct' });
