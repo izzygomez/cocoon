@@ -8,6 +8,8 @@ var exphbs = require('express-handlebars');
 var mongoose = require('mongoose');
 
 var routes = require('./routes/index');
+var register = require('./routes/register');
+var login = require('./routes/login');
 var users = require('./routes/users');
 
 var app = express();
@@ -33,6 +35,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
+app.use('/register', register)
+app.use('/login', login)
 app.use('/users', users);
 
 /// catch 404 and forwarding to error handler

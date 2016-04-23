@@ -11,14 +11,19 @@
         <a class='navbar-brand' href='/home'>APP NAME</a>
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class='nav navbar-nav'>
-            <li><a href='/register'>Register</a></li>
-            <li><a href='/login'>Login</a></li>
-          </ul>
+            <li><a href='/home'>Home</a></li>
+          </ul> 
         </div>
       </div>
     </nav>
 
-    <h1>Welcome to our website!</h1>
-
+    <div id='inline_login'>
+      <p><strong>Login</strong></p>
+      <form method="post" action="/login">
+        <div>Username: <input type='text' placeholder='Username' class='login-username' name='username' required /></div>
+        <div>Password: <input type='password' placeholder='Password' class='login-password' name='password' required /></div>
+        <button type='submit' class='login-submit'>Login</button>
+      </form>
+    </div>
   </body>
 </html>
