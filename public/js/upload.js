@@ -19,7 +19,7 @@ $(document).ready(function() {
       allLines = allLines.concat(lines);
       console.log(countLines);
       if (eof)  {
-        console.log('Finished readig ' + allLines.length + 'lines!');
+        console.log('Finished reading ' + allLines.length + ' lines!');
         return;
       }
       navigator.readSomeLines(index + lines.length, linesReadHandler);
