@@ -1,5 +1,5 @@
 $(document).ready(function() {
-  $('#read').click(function () {
+  function read() {
     var file = $('#file-select')[0].files[0];
     if (!file) {
       console.log('no file chosen');
@@ -20,9 +20,33 @@ $(document).ready(function() {
       console.log(countLines);
       if (eof)  {
         console.log('Finished reading ' + allLines.length + ' lines!');
+        allLines.push('#');
+        var text = allLines.join([separator = '\n']);
+        encrypt(text);
         return;
       }
       navigator.readSomeLines(index + lines.length, linesReadHandler);
     });
-  });
+  }
+
+  function encrypt(text) {
+    console.log(text.length);
+    console.log(text.substring(0, 100));
+
+    var startTime = new Date();
+
+    console.log('creating suffix tree...');
+    var suffixTree = new SuffixTree();
+    console.log('adding string...');
+    suffixTree.addString(text);
+    console.log('finished!');
+
+    var endTime = new Date();
+
+    var timeDiff = (endTime - startTime) / 1000;
+    console.log('Construction time: ' + timeDiff);
+    // var seconds = Math.round(timeDiff % 60);
+  }
+
+  $('#read').click(read);
 });
