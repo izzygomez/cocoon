@@ -5,21 +5,15 @@ var bcrypt = require('bcryptjs');
 
 var User = schemas.User;
 
-var authenticate = function(req, res, next) {
+/* GET index page. */
+router.get('/', function(req, res) {
   if (req.session.currentUser) {
-    next();
+    var user = req.session.currentUser;
+    var message = 'Logged in as: ' + user.username;
+    res.render('index', { message: message });
   } else {
     res.render('index', { message: '' });
   }
-};
-
-router.all('*', authenticate);
-
-/* GET index page. */
-router.get('/', function(req, res) {
-  var user = req.session.currentUser;
-  var message = 'Logged in as: ' + user.username;
-  res.render('index', { message: message });
 });
 
 /* GET logout */
