@@ -1,12 +1,16 @@
 #!/usr/bin/python
-import base64
 
-import time
-import csv
+import argparse
+import base64
 import json
 from suffix_tree import SuffixTree
 from Crypto.Cipher import AES
 import hashlib
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--filename', '-f', default='../files/small_shakespeare.txt',
+                    help='Path of file to encrypt')
+args = parser.parse_args()
 
 K_1 = 'This is a key789'
 K_D = 'This is a key123'
@@ -14,13 +18,17 @@ K_C = 'This is a key234'
 IV_D = 'This is an IV456'
 IV_C = 'This is an IV567'
 
-f = open('../files/small_shakespeare.txt')
-st = SuffixTree(f.read())
-length = len(st.string) - 1
+filename = args.filename
+
+st = None
+length = None
+with open(filename) as f:
+  st = SuffixTree(f.read())
+  length = len(st.string) - 1
 
 D = {}
 for leaf in st.leaves:
-  initPath = leaf.pathLabel[:len(leaf.parent.pathLabel)+1]
+  initPath = leaf.pathLabel[:leaf.parent.stringDepth+1]
   key = hashlib.sha256(initPath.encode()).hexdigest()
   index = '{:>16}'.format(str(length - len(leaf.pathLabel)))
   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
