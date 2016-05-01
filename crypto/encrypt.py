@@ -33,7 +33,6 @@ with open('ciphertext.json', 'w') as fout:
   for key in D:
     fout.write(json.dumps({key: D[key]}) + '\n')
 
-data = []
 D2 = {}
 with open('ciphertext.json') as f:
   for line in f:
