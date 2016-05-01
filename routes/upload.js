@@ -23,7 +23,7 @@ router.all('*', authenticate);
 router.get('/', function(req, res, next) {
   var user = req.session.currentUser;
   var message = 'Logged in as: ' + user.username;
-  res.render('upload', { user: user, message: message });
+  res.render('upload', { user: true, message: message });
 });
 
 /* POST upload page. */
@@ -48,7 +48,7 @@ router.post('/', function(req, res, next) {
   var upload = multer({ storage: storage }).single('ciphertextFile');
   upload(req, res, function(err) {
     if (err) {
-      res.render('upload', { user: user, message: 'Error uploading file.' });
+      res.render('upload', { user: true, message: 'Error uploading file.' });
     } else {
       var state = -1; // -1: starting D, 0: D, 1: C
       var totalD = -1;
@@ -105,9 +105,9 @@ router.post('/', function(req, res, next) {
                         { $push: { 'files': file } },
                         function(err, user) {
               if (err) {
-                res.render('upload', { user: username, message: 'An error occured!' });
+                res.render('upload', { user: true, message: 'An error occured!' });
               } else {
-                res.render('upload', { user: user, message: 'Upload successful!' });
+                res.render('upload', { user: true, message: 'Upload successful!' });
               }
             });
           }

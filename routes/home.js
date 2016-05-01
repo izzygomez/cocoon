@@ -18,7 +18,7 @@ router.all('*', authenticate);
 router.get('/', function(req, res) {
   var user = req.session.currentUser;
   var message = 'Welcome, ' + user.username + '!';
-  res.render('home', { user: user , message: message});
+  res.render('home', { user: true , message: message});
 });
 
 
