@@ -25,7 +25,10 @@
     <p>{{ message }}</p>
     <h1>Upload</h1>
 
-    <input id="file-select" type="file" name="files[]"/>
-    <button id="read">Upload</button>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+      Select ciphertext file to upload:
+      <input type="file" name="ciphertextFile" id="ciphertextFile">
+      <input type="submit" value="Upload" name="submit">
+    </form>
   </body>
 </html>

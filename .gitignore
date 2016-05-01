@@ -1,6 +1,7 @@
 node_modules/
 data/
 files/
+uploads/
 pycrypto-2.6.1/
 suffix_tree-2.1/
 *.log
