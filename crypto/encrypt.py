@@ -1,4 +1,9 @@
+#!/usr/bin/python
+import base64
+
 import time
+import csv
+import json
 from suffix_tree import SuffixTree
 from Crypto.Cipher import AES
 import hashlib
@@ -18,10 +23,25 @@ for leaf in st.leaves:
 
   index = '{:>16}'.format(str(length - len(leaf.pathLabel)))
   aes_D = AES.new(K_D, AES.MODE_CBC, IV)
-  value = aes_D.encrypt(index)
+  raw = aes_D.encrypt(index)
+  value = base64.b64encode(raw)
 
   D[key] = value
 
-for key in D:
-  aes_D2 = AES.new(K_D, AES.MODE_CBC, IV)
-  print key, aes_D2.decrypt(D[key])
+
+with open('ciphertext.json', 'w') as fout:
+  for key in D:
+    fout.write(json.dumps({key: D[key]}) + '\n')
+
+data = []
+D2 = {}
+with open('ciphertext.json') as f:
+  for line in f:
+    data = json.loads(line)
+    key = data.keys()[0]
+    D2[key] = data[key]
+
+  for key in D2:
+    aes_D2 = AES.new(K_D, AES.MODE_CBC, IV)
+    raw = base64.b64decode(D2[key])
+    print key, aes_D2.decrypt(raw)

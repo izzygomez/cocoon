@@ -6,3 +6,4 @@ suffix_tree-2.1/
 *.log
 *.swp
 *.pyc
+*.json
