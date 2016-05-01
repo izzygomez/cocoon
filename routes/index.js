@@ -10,9 +10,9 @@ router.get('/', function(req, res) {
   if (req.session.currentUser) {
     var user = req.session.currentUser;
     var message = 'Logged in as: ' + user.username;
-    res.render('index', { message: message });
+    res.render('index', { user: true, message: message });
   } else {
-    res.render('index', { message: '' });
+    res.render('index', { user: false, message: '' });
   }
 });
 

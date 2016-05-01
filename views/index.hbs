@@ -12,8 +12,14 @@
         <a class='navbar-brand' href='/'>Cocoon</a>
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class='nav navbar-nav'>
-            <li><a href='/register'>Register</a></li>
-            <li><a href='/login'>Login</a></li>
+            {{#if user}}
+              <li><a href='/home'>Files</a></li>
+              <li><a href='/upload'>Upload</a></li>
+              <li><a href='/logout'>Logout</a></li>
+            {{else}}
+              <li><a href='/register'>Register</a></li>
+              <li><a href='/login'>Login</a></li>
+            {{/if}}
           </ul>
         </div>
       </div>
