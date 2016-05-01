@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var exphbs = require('express-handlebars');
 var mongoose = require('mongoose');
+var session = require('express-session');
 
 var routes = require('./routes/index');
 var register = require('./routes/register');
@@ -34,6 +35,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({ secret: 'lolol', resave : true, saveUninitialized : true}));
 
 app.use('/', routes);
 app.use('/register', register)
