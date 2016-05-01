@@ -2,7 +2,10 @@ var express = require('express');
 var multer = require('multer');
 var fs = require('fs');
 var readline = require('readline');
+var schemas = require('../models/schemas');
 var router = express.Router();
+
+var User = schemas.User;
 
 var uploads_dir = './uploads';
 
@@ -75,7 +78,6 @@ router.post('/', function(req, res, next) {
             ++nD;
           } else {
             totalC = Number(line);
-            console.log(totalC);
             state = 1;
           }
         } else if (state == 1) {
@@ -84,22 +86,35 @@ router.post('/', function(req, res, next) {
             ++nC;
           } else {
             C.push(line);
-            for (var key in D) {
-              if (D.hasOwnProperty(key)) {
-                console.log(key + ' -> ' + D[key]);
+            // for (var key in D) {
+            //   if (D.hasOwnProperty(key)) {
+            //     console.log(key + ' -> ' + D[key]);
+            //   }
+            // }
+            // for (var i = 0; i < C.length; ++i) {
+            //   console.log(C[i]);
+            // }
+            // console.log(Object.keys(D).length)
+            // console.log(C.length);
+            var file = {
+              'name': req.file.originalname,
+              'D': D,
+              'C': C
+            };
+            User.update({ 'username': user.username },
+                        { $push: { 'files': file } },
+                        function(err, user) {
+              if (err) {
+                res.render('upload', { user: username, message: 'An error occured!' });
+              } else {
+                res.render('upload', { user: user, message: 'Upload successful!' });
               }
-            }
-            for (var i = 0; i < C.length; ++i) {
-              console.log(C[i]);
-            }
-            console.log(Object.keys(D).length)
-            console.log(C.length);
+            });
           }
         } else {
           console.log('ERROR');
         }
       });
-      res.render('upload', { user: user, message: 'Upload successful!' });
     }
   });
 });
