@@ -26,7 +26,7 @@
     <h1>Your Files</h1>
 
     {{#each files}}
-      <p>{{@index}}: {{this}}</p>
+      <li><a href='/file/{{this}}'>{{this}}</a></li>
     {{/each}}
 
   </body>
