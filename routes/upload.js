@@ -6,6 +6,7 @@ var schemas = require('../models/schemas');
 var router = express.Router();
 
 var User = schemas.User;
+var File = schemas.File;
 
 var uploads_dir = './uploads';
 
@@ -96,17 +97,22 @@ router.post('/', function(req, res, next) {
             // }
             // console.log(Object.keys(D).length)
             // console.log(C.length);
-            var file = {
-              'name': req.file.originalname,
-              'D': D,
-              'C': C
-            };
             User.update({ 'username': user.username },
-                        { $push: { 'files': file } },
-                        function(err, user) {
+                        { $push: { 'files': req.file.originalname } },
+                        function(err) {
               if (err) {
                 res.render('upload', { user: true, message: 'An error occured!' });
               } else {
+                var new_file = new File({
+                  'filename': req.file.originalname,
+                  'username': user.username,
+                  'D': D,
+                  'C': C
+                });
+                console.log(new_file.filename);
+                console.log(new_file.username);
+                new_file.save();
+                console.log('hi');
                 res.render('upload', { user: true, message: 'Upload successful!' });
               }
             });
