@@ -3,6 +3,7 @@ var schemas = require('../models/schemas');
 var router = express.Router();
 
 var User = schemas.User;
+var File = schemas.File;
 
 var authenticate = function(req, res, next) {
   if (req.session.currentUser) {
@@ -21,9 +22,20 @@ router.get('/:filename', function(req, res, next) {
 
   var filename = req.params.filename;
 
-  res.render('file', { user: true,
-                       filename: req.params.filename,
-                       message: message });
+  File.findOne({ 'username': user.username, 'filename': filename },
+               function(err, file) {
+    if (file == null) {
+      var message = 'File not found!';
+      res.render('file', { user: true,
+                           filename: req.params.filename,
+                           message: message });
+      return;
+    }
+
+    res.render('file', { user: true,
+                         filename: req.params.filename,
+                         message: message });
+  });
 });
 
 
