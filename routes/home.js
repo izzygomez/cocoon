@@ -18,7 +18,16 @@ router.all('*', authenticate);
 router.get('/', function(req, res) {
   var user = req.session.currentUser;
   var message = 'Welcome, ' + user.username + '!';
-  res.render('home', { user: true , message: message});
+
+  User.findOne({ 'username': user.username }, function(err, user) {
+    if (user == null) {
+      res.render('index', { message: 'An error occurred!' });
+      return;
+    }
+    res.render('home', { user: true ,
+                         files: user.files,
+                         message: message });
+  });
 });
 
 

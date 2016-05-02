@@ -25,5 +25,9 @@
     <p>{{ message }}</p>
     <h1>Your Files</h1>
 
+    {{#each files}}
+      <p>{{@index}}: {{this}}</p>
+    {{/each}}
+
   </body>
 </html>
