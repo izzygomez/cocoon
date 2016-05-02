@@ -28,7 +28,9 @@ with open(filename) as f:
 
 D = {}
 for leaf in st.leaves:
-  initPath = leaf.pathLabel[:leaf.parent.stringDepth+1]
+  leafPL = leaf.pathLabel[:len(leaf.pathLabel)-1] + '$'
+  parentPL = leaf.parent.pathLabel
+  initPath = leafPL[:len(parentPL)+1]
   key = hashlib.sha256(initPath.encode()).hexdigest()
   index = '{:>16}'.format(str(length - len(leaf.pathLabel)))
   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
