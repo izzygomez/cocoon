@@ -109,10 +109,7 @@ router.post('/', function(req, res, next) {
                   'D': D,
                   'C': C
                 });
-                console.log(new_file.filename);
-                console.log(new_file.username);
                 new_file.save();
-                console.log('hi');
                 res.render('upload', { user: true, message: 'Upload successful!' });
               }
             });
