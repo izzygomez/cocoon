@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src='/js/file.js'></script>
   </head>
 
   <body>
@@ -21,8 +22,12 @@
       </div>
     </nav>
 
-    <p>{{ message }}</p>
-    <h1>File: {{ filename }}</h1>
+    <p id='message'>{{ message }}</p>
+    <h1 id='filename'>{{ filename }}</h1>
+
+    <p>Search for a substring:</p>
+    <textarea id='query' name='substringQuery' cols='50' rows='5'></textarea>
+    <button id='submit' type='button'>Search</button>
 
   </body>
 </html>
