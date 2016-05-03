@@ -17,6 +17,11 @@ def getIndexOfInnerNode(node, length):
     node = node.firstChild
   return length - len(node.pathLabel) + 1
 
+def F(key, plaintext):
+  keyHash = hashlib.sha256(key.encode()).hexdigest()
+  ptxtHash = hashlib.sha256(plaintext.encode()).hexdigest()
+  return hashlib.sha256((ptxtHash + keyHash).encode()).hexdigest()
+
 BS = 16
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS) 
 unpad = lambda s : s[0:-ord(s[-1])]
@@ -55,7 +60,7 @@ for leaf in st.leaves:
   leafPL = leaf.pathLabel[:len(leaf.pathLabel)-1] + '$'
   parentPL = leaf.parent.pathLabel
   initPath = leafPL[:len(parentPL)+1]
-  key = hashlib.sha256(initPath.encode()).hexdigest()
+  key = F(K_1, initPath)
   index = str(length - len(leaf.pathLabel) + 1)
   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
   raw = aes_D.encrypt(pad(index))
@@ -68,8 +73,7 @@ for innerNode in st.innerNodes:
   nodePL = innerNode.pathLabel
   parentPL = innerNode.parent.pathLabel
   initPath = nodePL[:len(parentPL)+1]
-  key = hashlib.sha256(initPath.encode()).hexdigest()
-  # index = str(length - len(innerNode.pathLabel))
+  key = F(K_1, initPath)
   index = str(getIndexOfInnerNode(innerNode, length))
   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
   raw = aes_D.encrypt(pad(index))

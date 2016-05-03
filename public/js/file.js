@@ -2,13 +2,27 @@ $(document).ready(function() {
 
   sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."]();
 
+  K_1 = 'This is a key789';
   K_D = 'This is a key123';
   K_C = 'This is a key234';
+  K_1 += K_1
   K_D += K_D;
   K_C += K_C;
 
   IV_D = 'This is an IV456';
   IV_C = 'This is an IV567';
+
+  function F(key, plaintext) {
+    var key_hash_bit = sjcl.hash.sha256.hash(key);
+    var key_hash = sjcl.codec.hex.fromBits(key_hash_bit);
+
+    var ctxt_bit = sjcl.hash.sha256.hash(plaintext);
+    var ctxt = sjcl.codec.hex.fromBits(ctxt_bit);
+
+    var final_ctxt_bit = sjcl.hash.sha256.hash(ctxt + key_hash);
+    var final_ctxt = sjcl.codec.hex.fromBits(final_ctxt_bit);
+    return final_ctxt;
+  };
 
   function encrypt(key, iv, plaintext) {
     var key_bit = sjcl.codec.utf8String.toBits(key);
@@ -44,9 +58,8 @@ $(document).ready(function() {
     var filename = $('#filename').html();
     var T = [];
     for (var i = 0; i < queryString.length; i++) {
-      var bitArray = sjcl.hash.sha256.hash(queryString.substring(0, i + 1));
-      var formattedString = sjcl.codec.hex.fromBits(bitArray);
-      T.push(formattedString);
+      var ctxt = F(K_1, queryString.substring(0, i + 1));
+      T.push(ctxt);
     }
 
     console.log(T);
@@ -95,16 +108,6 @@ $(document).ready(function() {
     var startIndex = decrypt(K_D, IV_D, encryptedIndex);
     console.log('startIndex: ' + startIndex);
 
-    // var adata = [];
-    // var key_bit = sjcl.codec.utf8String.toBits(K_C);
-    // var iv_bit = sjcl.codec.utf8String.toBits(IV_C);
-    // var prp = new sjcl.cipher.aes(key_bit);
-    // var ciphertext_bit = sjcl.codec.base64.toBits(encryptedIndex);
-    // var decrypted_ciphertext = sjcl.mode.cbc.decrypt(prp, ciphertext_bit, iv_bit, adata);
-    // var actual_decrypted_ctxt = sjcl.codec.base64.fromBits(decrypted_ciphertext);
-
-    // var startIndex = actual_decrypted_ctxt;
-
     $.ajax({
       url: '/file/' + filename + '/query/2',
       type: 'POST',
@@ -142,8 +145,8 @@ $(document).ready(function() {
     for (var i = 0; i < length; ++i) {
       decryptedC += decrypt(K_C, IV_C, C[i]);
     }
-    console.log('queryString: ' + queryString);
-    console.log('decryptedC: ' + decryptedC);
+    console.log('queryString: \'' + queryString + "\'");
+    console.log('decryptedC: \'' + decryptedC + "\'");
     if (queryString == decryptedC) {
       console.log('strings match :D');
       $('#message').html('found at index: ' + index);
