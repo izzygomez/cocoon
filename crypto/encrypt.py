@@ -12,13 +12,36 @@ parser.add_argument('--filename', '-f', default='../files/small_shakespeare.txt'
                     help='Path of file to encrypt')
 args = parser.parse_args()
 
+
+from Crypto.Cipher import AES
+from Crypto import Random
+
+BS = 16
+pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS) 
+unpad = lambda s : s[0:-ord(s[-1])]
+
 K_1 = 'This is a key789'
 K_D = 'This is a key123'
 K_C = 'This is a key234'
 IV_D = 'This is an IV456'
 IV_C = 'This is an IV567'
 
+K_1 += K_1
+K_D += K_D
+K_C += K_C
+
 filename = args.filename
+
+# key = 'This is a key12 This is a key12 '
+# text = 'string of size16'
+# iv = 'This is an IV456'
+# aes = AES.new(key, AES.MODE_CBC, iv)
+# ciphertext = aes.encrypt(pad(text))
+# ciphertext = base64.b64encode(ciphertext)
+#
+# aes = AES.new(key, AES.MODE_CBC, iv)
+# plaintext = aes.decrypt(base64.b64decode(ciphertext))
+# print unpad(plaintext)
 
 st = None
 length = None
@@ -34,14 +57,14 @@ for leaf in st.leaves:
   key = hashlib.sha256(initPath.encode()).hexdigest()
   index = '{:>16}'.format(str(length - len(leaf.pathLabel)))
   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
-  raw = aes_D.encrypt(index)
+  raw = aes_D.encrypt(pad(index))
   value = base64.b64encode(raw)
   D[key] = value
 
 C = [None] * (len(st.string) - 1)
 for i, c in enumerate(st.string[:-1]):
   aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
-  raw = aes_C.encrypt('{:>16}'.format(c))
+  raw = aes_C.encrypt(pad('{:>16}'.format(c)))
   value = base64.b64encode(raw)
   C[i] = value
 
@@ -72,13 +95,13 @@ with open('ciphertext.txt') as f:
   # for key in D2:
   #   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
   #   raw = base64.b64decode(D2[key])
-  #   print key, aes_D.decrypt(raw)
+  #   print key, unpad(aes_D.decrypt(raw))
 
   # # check array C
   # C3 = []
   # for c in C2:
   #   aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
-  #   decrypted = aes_C.decrypt(c)[-1:]
+  #   decrypted = unpad(aes_C.decrypt(c))[-1:]
   #   C3.append(decrypted)
   # C4 = ''.join(C3)
   # print C4
