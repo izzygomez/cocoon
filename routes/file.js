@@ -40,9 +40,30 @@ router.get('/:filename', function(req, res, next) {
 
 router.post('/:filename/query/1', function(req, res, next) {
   var user = req.session.currentUser;
-  console.log('got the request! (first round)');
-  console.log(req.body.queryString);
-  res.send({ success: true, message: 'something' });
+  var filename = req.params.filename;
+  File.findOne({ 'username': user.username, 'filename': filename },
+               function(err, file) {
+    if (err || file == null) {
+      res.send({ success: false, message: 'File not found!' });
+      return;
+    }
+    var T = req.body.T;
+    var encryptedIndex = -1;
+    var found = false;
+    for (var i = T.length - 1; i >= 0; --i) {
+      if (T[i] in file.D) {
+        encryptedIndex = file.D[ T[i] ];
+        found = true;
+        break;
+      }
+    }
+    if (found) {
+      console.log('found!');
+      res.send({ success: true, found: true, encryptedIndex: encryptedIndex });
+    } else {
+      res.send({ success: true, found: false });
+    }
+  });
 });
 
 router.post('/:filename/query/2', function(req, res, next) {
