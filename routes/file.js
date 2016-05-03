@@ -89,10 +89,11 @@ router.post('/:filename/query/2', function(req, res, next) {
     }
     var C = [];
     for (var i = 0; i < length; ++i) {
-      C.push(file.C[i + startIndex]);
+      C.push(file.C[1 + i + startIndex]);
     }
     console.log('success, sending C');
-    res.send({ success: true, message: 'Returning C', C: C });
+    res.send({ success: true, message: 'Returning C',
+               C: C, index: startIndex });
   });
 });
 

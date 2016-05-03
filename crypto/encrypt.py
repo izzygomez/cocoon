@@ -55,7 +55,8 @@ for leaf in st.leaves:
   parentPL = leaf.parent.pathLabel
   initPath = leafPL[:len(parentPL)+1]
   key = hashlib.sha256(initPath.encode()).hexdigest()
-  index = '{:>16}'.format(str(length - len(leaf.pathLabel)))
+  # index = '{:>16}'.format(str(length - len(leaf.pathLabel)))
+  index = str(length - len(leaf.pathLabel))
   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
   raw = aes_D.encrypt(pad(index))
   value = base64.b64encode(raw)
@@ -68,7 +69,8 @@ for innerNode in st.innerNodes:
   parentPL = innerNode.parent.pathLabel
   initPath = nodePL[:len(parentPL)+1]
   key = hashlib.sha256(initPath.encode()).hexdigest()
-  index = '{:>16}'.format(str(length - len(innerNode.pathLabel)))
+  # index = '{:>16}'.format(str(length - len(innerNode.pathLabel)))
+  index = str(length - len(innerNode.pathLabel))
   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
   raw = aes_D.encrypt(pad(index))
   value = base64.b64encode(raw)
@@ -77,7 +79,7 @@ for innerNode in st.innerNodes:
 C = [None] * (len(st.string) - 1)
 for i, c in enumerate(st.string[:-1]):
   aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
-  raw = aes_C.encrypt(pad('{:>16}'.format(c)))
+  raw = aes_C.encrypt(pad(c))
   value = base64.b64encode(raw)
   C[i] = value
 

@@ -1,5 +1,7 @@
 $(document).ready(function() {
 
+  sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."]();
+
   K_D = 'This is a key123';
   K_C = 'This is a key234';
   K_D += K_D;
@@ -41,10 +43,10 @@ $(document).ready(function() {
     var queryString = $('#query').val();
     var filename = $('#filename').html();
     var T = [];
-    for (i=0; i<queryString.length; i++) {
-      var bitArray = sjcl.hash.sha256.hash(queryString.substring(0,i+1));
+    for (var i = 0; i < queryString.length; i++) {
+      var bitArray = sjcl.hash.sha256.hash(queryString.substring(0, i + 1));
       var formattedString = sjcl.codec.hex.fromBits(bitArray);
-      T = T.concat(formattedString);
+      T.push(formattedString);
     }
 
     console.log(T);
@@ -87,12 +89,11 @@ $(document).ready(function() {
 
     var filename = $('#filename').html();
 
-    sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."]();
-
     var queryString = $('#query').val();
     var length = queryString.length;
 
     var startIndex = decrypt(K_D, IV_D, encryptedIndex);
+    console.log('startIndex: ' + startIndex);
 
     // var adata = [];
     // var key_bit = sjcl.codec.utf8String.toBits(K_C);
@@ -120,7 +121,7 @@ $(document).ready(function() {
           console.log(message);
           console.log("C: ", C);
           $('#message').html(message);
-          round3();
+          round3(C, data.index);
         } else {
           console.log("no success RIP");
           $('#message').html(message);
@@ -132,8 +133,24 @@ $(document).ready(function() {
     });
   };
 
-  function round3() {
+  function round3(C, index) {
     console.log('check whether strings match');
+    var queryString = $('#query').val();
+    var length = queryString.length;
+
+    var decryptedC = '';
+    for (var i = 0; i < length; ++i) {
+      decryptedC += decrypt(K_C, IV_C, C[i]);
+    }
+    console.log('queryString: ' + queryString);
+    console.log('decryptedC: ' + decryptedC);
+    if (queryString == decryptedC) {
+      console.log('strings match :D');
+      $('#message').html('found at index: ' + index);
+    } else {
+      console.log('strings do not match');
+      $('#message').html('did not find substring');
+    }
   };
 
   $('#submit').click(round1);
