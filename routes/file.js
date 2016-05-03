@@ -61,7 +61,7 @@ router.post('/:filename/query/1', function(req, res, next) {
       console.log('found!');
       res.send({ success: true, found: true, encryptedIndex: encryptedIndex });
     } else {
-      res.send({ success: true, found: false });
+      res.send({ success: true, found: false, message: 'Substring not found' });
     }
   });
 });
