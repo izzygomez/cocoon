@@ -56,7 +56,7 @@ for leaf in st.leaves:
   initPath = leafPL[:len(parentPL)+1]
   key = hashlib.sha256(initPath.encode()).hexdigest()
   # index = '{:>16}'.format(str(length - len(leaf.pathLabel)))
-  index = str(length - len(leaf.pathLabel))
+  index = str(length - len(leaf.pathLabel) + 1)
   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
   raw = aes_D.encrypt(pad(index))
   value = base64.b64encode(raw)
