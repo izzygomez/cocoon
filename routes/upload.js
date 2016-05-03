@@ -53,71 +53,82 @@ router.post('/', function(req, res, next) {
     } else if (req.file.mimetype!=="text/plain") {
       res.render('upload', { user: true, message: 'Only text file uploads are supported.'})
     } else {
-      var state = -1; // -1: starting D, 0: D, 1: C
-      var totalD = -1;
-      var totalC = -1;
-      var nD = 0;
-      var nC = 0;
-
-      var D = {};
-      var C = [];
-
-      var lineReader = readline.createInterface({
-        terminal: false,
-        input: fs.createReadStream(req.file.path)
-      });
-      lineReader.on('line', function(line) {
-        if (state === -1) {
-          totalD = Number(line);
-          state = 0;
-        } else if (state === 0) {
-          if (nD < totalD) {
-            json = JSON.parse(line);
-            for (var key in json) {
-              if (json.hasOwnProperty(key)) {
-                D[key] = json[key];
-              }
-            }
-            ++nD;
+      User.findOne({ 'username': user.username }, function(err, currentuser){
+        if (err) { 
+          res.render('upload', { user: true, message: 'Error uploading file. Username not found.' });
+        } else {
+          if (currentuser.files.indexOf(req.file.originalname) > -1) {
+            res.render('upload', { user: true, message: 'You may not upload files with duplicate filenames!' });
           } else {
-            totalC = Number(line);
-            state = 1;
-          }
-        } else if (state == 1) {
-          if (nC < totalC - 1) {
-            C.push(line);
-            ++nC;
-          } else {
-            C.push(line);
-            // for (var key in D) {
-            //   if (D.hasOwnProperty(key)) {
-            //     console.log(key + ' -> ' + D[key]);
-            //   }
-            // }
-            // for (var i = 0; i < C.length; ++i) {
-            //   console.log(C[i]);
-            // }
-            // console.log(Object.keys(D).length)
-            // console.log(C.length);
-            User.update({ 'username': user.username },
-                        { $push: { 'files': req.file.originalname } },
-                        function(err) {
-              if (err) {
-                res.render('upload', { user: true, message: 'An error occured!' });
+            var state = -1; // -1: starting D, 0: D, 1: C
+            var totalD = -1;
+            var totalC = -1;
+            var nD = 0;
+            var nC = 0;
+
+            var D = {};
+            var C = [];
+
+            var lineReader = readline.createInterface({
+              terminal: false,
+              input: fs.createReadStream(req.file.path)
+            });
+            console.log("about to go into line reader!");
+            lineReader.on('line', function(line) {
+              if (state === -1) {
+                totalD = Number(line);
+                state = 0;
+              } else if (state === 0) {
+                if (nD < totalD) {
+                  json = JSON.parse(line);
+                  for (var key in json) {
+                    if (json.hasOwnProperty(key)) {
+                      D[key] = json[key];
+                    }
+                  }
+                  ++nD;
+                } else {
+                  totalC = Number(line);
+                  state = 1;
+                }
+              } else if (state == 1) {
+                if (nC < totalC - 1) {
+                  C.push(line);
+                  ++nC;
+                } else {
+                  C.push(line);
+                  // for (var key in D) {
+                  //   if (D.hasOwnProperty(key)) {
+                  //     console.log(key + ' -> ' + D[key]);
+                  //   }
+                  // }
+                  // for (var i = 0; i < C.length; ++i) {
+                  //   console.log(C[i]);
+                  // }
+                  // console.log(Object.keys(D).length)
+                  // console.log(C.length);
+                  User.update({ 'username': user.username },
+                              { $push: { 'files': req.file.originalname } },
+                              function(err) {
+                    if (err) {
+                      res.render('upload', { user: true, message: 'An error occured!' });
+                    } else {
+                      var new_file = new File({
+                        'filename': req.file.originalname,
+                        'username': user.username,
+                        'D': D,
+                        'C': C
+                      });
+                      new_file.save();
+                      res.render('upload', { user: true, message: 'Upload successful!' });
+                    }
+                  });
+                }
               } else {
-                var new_file = new File({
-                  'filename': req.file.originalname,
-                  'username': user.username,
-                  'D': D,
-                  'C': C
-                });
-                new_file.save();
-                res.render('upload', { user: true, message: 'Upload successful!' });
+                console.log('ERROR');
               }
             });
           }
-        } else {
-          console.log('ERROR');
         }
       });
     }
