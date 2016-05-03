@@ -71,22 +71,27 @@ router.post('/:filename/query/1', function(req, res, next) {
 router.post('/:filename/query/2', function(req, res, next) {
   var user = req.session.currentUser;
   var filename = req.params.filename;
-  var index = req.body.index;
-  var length = req.body.length;
+  var startIndex = Number(req.body.startIndex);
+  var length = Number(req.body.length);
+  console.log('start index: ' + startIndex);
+  console.log('length: ' + length);
   File.findOne({ 'username': user.username, 'filename': filename },
                function(err, file) {
     if (err || file == null) {
+      console.log('file not found');
       res.send({ success: false, message: 'File not found!' });
       return;
     }
-    if (index + length > file.C.length) {
+    if (startIndex + length > file.C.length) {
+      console.log('too long');
       res.send({ success: false, message: 'Substring does not exist' });
       return;
     }
     var C = [];
     for (var i = 0; i < length; ++i) {
-      C.push(file.C[i + index]);
+      C.push(file.C[i + startIndex]);
     }
+    console.log('success, sending C');
     res.send({ success: true, message: 'Returning C', C: C });
   });
 });
