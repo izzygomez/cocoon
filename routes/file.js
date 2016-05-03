@@ -79,6 +79,10 @@ router.post('/:filename/query/2', function(req, res, next) {
       res.send({ success: false, message: 'File not found!' });
       return;
     }
+    if (index + length > file.C.length) {
+      res.send({ success: false, message: 'Substring does not exist' });
+      return;
+    }
     var C = [];
     for (var i = 0; i < length; ++i) {
       C.push(file.C[i + index]);
