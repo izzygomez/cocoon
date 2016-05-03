@@ -47,6 +47,8 @@ $(document).ready(function() {
     console.log('round 2 of communication protocol');
     var filename = $('#filename').html();
 
+    sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."]();
+
     K_C = 'This is a key234'
     IV_C = 'This is an IV567'
 
