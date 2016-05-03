@@ -50,6 +50,8 @@ router.post('/', function(req, res, next) {
   upload(req, res, function(err) {
     if (err) {
       res.render('upload', { user: true, message: 'Error uploading file.' });
+    } else if (req.file.mimetype!=="text/plain") {
+      res.render('upload', { user: true, message: 'Only text file uploads are supported.'})
     } else {
       User.findOne({ 'username': user.username }, function(err, currentuser){
         if (err) { 
