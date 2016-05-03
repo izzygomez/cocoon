@@ -59,7 +59,9 @@ router.post('/:filename/query/1', function(req, res, next) {
     }
     if (found) {
       console.log('found!');
-      res.send({ success: true, found: true, encryptedIndex: encryptedIndex });
+      res.send({ success: true, found: true,
+                 message: 'Substring found :D',
+                 encryptedIndex: encryptedIndex });
     } else {
       res.send({ success: true, found: false, message: 'Substring not found' });
     }
@@ -68,10 +70,25 @@ router.post('/:filename/query/1', function(req, res, next) {
 
 router.post('/:filename/query/2', function(req, res, next) {
   var user = req.session.currentUser;
-  console.log('got the request! (second round)');
-  console.log(req.body.startIndex);
-  console.log(req.body.size);
-  res.send({ success: true, message: 'something something' });
+  var filename = req.params.filename;
+  var index = req.body.index;
+  var length = req.body.length;
+  File.findOne({ 'username': user.username, 'filename': filename },
+               function(err, file) {
+    if (err || file == null) {
+      res.send({ success: false, message: 'File not found!' });
+      return;
+    }
+    if (index + length > file.C.length) {
+      res.send({ success: false, message: 'Substring does not exist' });
+      return;
+    }
+    var C = [];
+    for (var i = 0; i < length; ++i) {
+      C.push(file.C[i + index]);
+    }
+    res.send({ success: true, message: 'Returning C', C: C });
+  });
 });
 
 
