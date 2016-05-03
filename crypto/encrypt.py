@@ -12,9 +12,10 @@ parser.add_argument('--filename', '-f', default='../files/small_shakespeare.txt'
                     help='Path of file to encrypt')
 args = parser.parse_args()
 
-
-from Crypto.Cipher import AES
-from Crypto import Random
+def getIndexOfInnerNode(node, length):
+  while node.firstChild is not None:
+    node = node.firstChild
+  return length - len(node.pathLabel) + 1
 
 BS = 16
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS) 
@@ -55,7 +56,6 @@ for leaf in st.leaves:
   parentPL = leaf.parent.pathLabel
   initPath = leafPL[:len(parentPL)+1]
   key = hashlib.sha256(initPath.encode()).hexdigest()
-  # index = '{:>16}'.format(str(length - len(leaf.pathLabel)))
   index = str(length - len(leaf.pathLabel) + 1)
   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
   raw = aes_D.encrypt(pad(index))
@@ -69,8 +69,8 @@ for innerNode in st.innerNodes:
   parentPL = innerNode.parent.pathLabel
   initPath = nodePL[:len(parentPL)+1]
   key = hashlib.sha256(initPath.encode()).hexdigest()
-  # index = '{:>16}'.format(str(length - len(innerNode.pathLabel)))
-  index = str(length - len(innerNode.pathLabel))
+  # index = str(length - len(innerNode.pathLabel))
+  index = str(getIndexOfInnerNode(innerNode, length))
   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
   raw = aes_D.encrypt(pad(index))
   value = base64.b64encode(raw)
