@@ -45,6 +45,8 @@ $(document).ready(function() {
 
   function round2(encryptedIndex) {
     console.log('round 2 of communication protocol');
+    var filename = $('#filename').html();
+
     K_C = 'This is a key234'
     IV_C = 'This is an IV567'
 
@@ -79,6 +81,7 @@ $(document).ready(function() {
           $('#message').html(message);
           round3();
         } else {
+          console.log("no success RIP");
           $('#message').html(message);
         }
       },
