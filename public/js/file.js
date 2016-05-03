@@ -28,6 +28,7 @@ $(document).ready(function() {
           if (found) {
             console.log('success!');
             console.log(message);
+            $('#message').html(message);
             round2(data.encryptedIndex);
           } else {
             $('#message').html(message);
@@ -44,19 +45,38 @@ $(document).ready(function() {
 
   function round2(encryptedIndex) {
     console.log('round 2 of communication protocol');
+    K_C = 'This is a key234'
+    IV_C = 'This is an IV567'
+
+    var queryString = $('#query').val();
+    var length = queryString.length;
+    var adata = [];
+    var key_bit = sjcl.codec.utf8String.toBits(K_C);
+    var iv_bit = sjcl.codec.utf8String.toBits(IV_C);
+    var prp = new sjcl.cipher.aes(key_bit);
+
+    var ciphertext_bit = sjcl.codec.base64.toBits(encryptedIndex);
+    var decrypted_ciphertext = sjcl.mode.cbc.decrypt(prp, ciphertext_bit, iv_bit, adata);
+    var actual_decrypted_ctxt = sjcl.codec.base64.fromBits(decrypted_ciphertext);
+
+    var startIndex = actual_decrypted_ctxt;
+
     $.ajax({
       url: '/file/' + filename + '/query/2',
       type: 'POST',
       data: {
-        startIndex: 42,
-        size: 1337
+        startIndex: startIndex,
+        length: length
       },
       success: function(data) {
         var success = data.success;
         var message = data.message;
         if (success) {
+          var C = data.C;
           console.log('success!');
           console.log(message);
+          console.log("C: ", C);
+          $('#message').html(message);
           round3();
         } else {
           $('#message').html(message);
