@@ -52,10 +52,14 @@ filename = args.filename
 st = None
 length = None
 with open(filename) as f:
+  print 'Constructing suffix tree...'
   st = SuffixTree(f.read())
+  print 'done'
   length = len(st.string) - 1
 
+print 'Encrypting suffix tree...'
 D = {}
+print '\tProcessing leaves...'
 for leaf in st.leaves:
   leafPL = leaf.pathLabel[:len(leaf.pathLabel)-1] + '$'
   parentPL = leaf.parent.pathLabel
@@ -67,6 +71,7 @@ for leaf in st.leaves:
   value = base64.b64encode(raw)
   D[key] = value
 
+print '\tProcessing inner nodes...'
 for innerNode in st.innerNodes:
   if innerNode.stringDepth == 0:
     continue
@@ -79,48 +84,53 @@ for innerNode in st.innerNodes:
   raw = aes_D.encrypt(pad(index))
   value = base64.b64encode(raw)
   D[key] = value
+print 'done'
 
+print 'constructing C...'
 C = [None] * (len(st.string) - 1)
 for i, c in enumerate(st.string[:-1]):
   aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
   raw = aes_C.encrypt(pad(c))
   value = base64.b64encode(raw)
   C[i] = value
+print 'done'
 
-with open('ciphertext.txt', 'w') as fout:
+print 'saving to file...'
+with open('c_shakespeare.txt', 'w') as fout:
   fout.write(str(len(D)) + '\n')
   for key in D:
     fout.write(json.dumps({key: D[key]}) + '\n')
   fout.write(str(len(C)) + '\n')
   for c in C:
     fout.write(c + '\n')
+print 'DONE'
 
-# to parse ciphertext
-D2 = {}
-C2 = []
-with open('ciphertext.txt') as f:
-  sizeD = int(f.readline())
-  for i in xrange(sizeD):
-    data = json.loads(f.readline())
-    key = data.keys()[0]
-    D2[key] = data[key]
-
-  sizeC = int(f.readline())
-  for i in xrange(sizeC):
-    C2.append(f.readline()[:-1])
-    C2[i] = base64.b64decode(C2[i])
-
-  # # check dictionary D
-  # for key in D2:
-  #   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
-  #   raw = base64.b64decode(D2[key])
-  #   print key, unpad(aes_D.decrypt(raw))
-
-  # # check array C
-  # C3 = []
-  # for c in C2:
-  #   aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
-  #   decrypted = unpad(aes_C.decrypt(c))[-1:]
-  #   C3.append(decrypted)
-  # C4 = ''.join(C3)
-  # print C4
+# # to parse ciphertext
+# D2 = {}
+# C2 = []
+# with open('ciphertext.txt') as f:
+#   sizeD = int(f.readline())
+#   for i in xrange(sizeD):
+#     data = json.loads(f.readline())
+#     key = data.keys()[0]
+#     D2[key] = data[key]
+# 
+#   sizeC = int(f.readline())
+#   for i in xrange(sizeC):
+#     C2.append(f.readline()[:-1])
+#     C2[i] = base64.b64decode(C2[i])
+# 
+#   # # check dictionary D
+#   # for key in D2:
+#   #   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
+#   #   raw = base64.b64decode(D2[key])
+#   #   print key, unpad(aes_D.decrypt(raw))
+# 
+#   # # check array C
+#   # C3 = []
+#   # for c in C2:
+#   #   aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
+#   #   decrypted = unpad(aes_C.decrypt(c))[-1:]
+#   #   C3.append(decrypted)
+#   # C4 = ''.join(C3)
+#   # print C4
