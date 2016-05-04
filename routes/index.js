@@ -12,7 +12,7 @@ router.get('/', function(req, res) {
     var message = 'Logged in as: ' + user.username;
     res.render('index', { user: true, message: message });
   } else {
-    res.render('index', { user: false, message: '' });
+    res.render('index', { user: false, message: 'Encrypted Substring Search' });
   }
 });
 

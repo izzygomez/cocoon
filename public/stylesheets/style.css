@@ -1,8 +1,34 @@
+/** Importing fonts and setting the stage for entire document **/
+@import url("https://fonts.googleapis.com/css?family=Vollkorn|VT323");
+@import url("https://fonts.googleapis.com/css?family=Roboto");
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+    padding: 50px;
+    font-family: "Roboto", "Vollkorn", Georgia, "Times New Roman", Times, serif;
+    background: #fff4dd;
+    color: #42210b
 }
 
 a {
   color: #00B7FF;
+}
+
+/** Positioning for particles-js container **/
+#particles-js {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%
+}
+/** Positioning for main content container **/
+.container {
+	max-width: 600px;
+	position: relative;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: auto
 }

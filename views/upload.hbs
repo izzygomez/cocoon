@@ -1,8 +1,9 @@
 <!DOCTYPE HTML>
 <html>
   <head>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <title>Cocoon</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
     <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="/js/line-navigator.js"></script>
@@ -10,25 +11,31 @@
     <script src="/js/ukkonen.js"></script>
   </head>
   <body>
-    <nav class='navbar navbar-default'>
-      <div class='container-fluid'>
-        <a class='navbar-brand' href='/'>Cocoon</a>
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-          <ul class='nav navbar-nav'>
-            <li><a href='/home'>Back</a></li>
-            <li><a href='/logout'>Logout</a></li>
-          </ul>
+    <div id="particles-js"></div>
+    <div class="container">
+      <nav class='navbar navbar-default navbar-inverse'>
+        <div class='container-fluid'>
+          <a class='navbar-brand' href='/'>Cocoon</a>
+          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class='nav navbar-nav'>
+              <li><a href='/home'>Back</a></li>
+              <li><a href='/logout'>Logout</a></li>
+            </ul>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
 
-    <p>{{ message }}</p>
-    <h1>Upload</h1>
+      <p>{{ message }}</p>
+      <h1>Upload</h1>
 
-    <form action="/upload" method="post" enctype="multipart/form-data">
-      Select ciphertext file to upload:
-      <input type="file" name="ciphertextFile" id="ciphertextFile">
-      <input type="submit" value="Upload" name="submit">
-    </form>
+      <form action="/upload" method="post" enctype="multipart/form-data">
+        Select ciphertext file to upload:
+        <input type="file" name="ciphertextFile" id="ciphertextFile">
+        <input type="submit" value="Upload" name="submit">
+      </form>
+    </div>
+
+    <script src="/js/particles.min.js"></script>
+    <script src="/js/setup.js"></script>
   </body>
 </html>
