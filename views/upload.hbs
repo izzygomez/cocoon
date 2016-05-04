@@ -24,14 +24,14 @@
           </div>
         </div>
       </nav>
-
-      <p>{{ message }}</p>
-      <h1>Upload</h1>
+      <h1>Upload file</h1>
 
       <form action="/upload" method="post" enctype="multipart/form-data">
-        Select ciphertext file to upload:
+        <p>Select ciphertext file to upload:</p>
         <input type="file" name="ciphertextFile" id="ciphertextFile">
-        <input type="submit" value="Upload" name="submit">
+        <br>
+        <button class="btn btn-default" type="submit" value="Upload" name="submit">Upload</button>
+        <p>{{message}}</p>
       </form>
     </div>
 
