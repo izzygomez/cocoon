@@ -26,12 +26,14 @@
         </div>
       </nav>
 
-      <p id='message'>{{ message }}</p>
-      <h1 id='filename'>{{ filename }}</h1>
+      <p id='filename'>{{ filename }}</p>
 
       <p>Search for a substring:</p>
-      <textarea id='query' name='substringQuery' cols='50' rows='5'></textarea>
-      <button id='submit' type='button'>Search</button>
+      <!--<input type="text" id="query" name="substringQuery">-->
+      <textarea id='query' name='substringQuery' cols="50" rows='3'></textarea>
+      <br>
+      <button id='submit' type='button' class="btn btn-default">Search</button>
+      <p id='message'>{{ message }}</p>
     </div>
     <script src="/js/particles.min.js"></script>
     <script src="/js/setup.js"></script>
