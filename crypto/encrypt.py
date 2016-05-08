@@ -29,9 +29,10 @@ unpad = lambda s : s[0:-ord(s[-1])]
 K_1 = 'This is a key789'
 K_D = 'This is a key123'
 K_C = 'This is a key234'
-K_L = 'This is a key345'
+K_L = 'This is a key777'
 IV_D = 'This is an IV456'
 IV_C = 'This is an IV567'
+IV_L = 'This is an IV777'
 
 K_1 += K_1
 K_D += K_D
@@ -108,7 +109,17 @@ for i, c in enumerate(st.string[:-1]):
   raw = aes_C.encrypt(pad(c))
   value = base64.b64encode(raw)
   C[i] = value
-print 'done'
+print '\tdone'
+
+print 'constructing L...'
+L = [None] * len(st.string)
+for leaf in st.leaves:
+  index = str(length - len(leaf.pathLabel) + 1)
+  aes_L = AES.new(K_L, AES.MODE_CBC, IV_L)
+  raw = aes_L.encrypt(pad(index))
+  value = base64.b64encode(raw)
+  L[leaf.erdex] = value
+print '\tdone'
 
 print 'saving to file...'
 with open('ciphertext.txt', 'w') as fout:
@@ -118,6 +129,9 @@ with open('ciphertext.txt', 'w') as fout:
   fout.write(str(len(C)) + '\n')
   for c in C:
     fout.write(c + '\n')
+  fout.write(str(len(L)) + '\n')
+  for l in L:
+    fout.write(l + '\n')
 print 'DONE'
 
 # # to parse ciphertext
