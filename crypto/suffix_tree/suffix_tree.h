@@ -28,7 +28,7 @@ struct node {
     struct node *prev;
 
     /* eric */
-    int index;
+    int erdex;
     int num_leaves;
 
     /* link to python -- needed to make sure we always get the same

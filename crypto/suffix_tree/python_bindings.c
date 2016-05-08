@@ -49,6 +49,10 @@ static PyObject *Node_end               (NodeObject                *self);
 static PyObject *Node_index             (NodeObject                *self);
 static PyObject *Node_string_depth      (NodeObject                *self);
 
+// eric
+static PyObject *Node_erdex             (NodeObject                *self);
+static PyObject *Node_num_leaves        (NodeObject                *self);
+
 static PyObject *Node_edge_label        (NodeObject                *self);
 static PyObject *Node_path_label        (NodeObject                *self);
 static PyObject *Node_suffix            (NodeObject                *self);
@@ -111,6 +115,19 @@ static PyGetSetDef Node_getseters[] = {
      "Notice that this is not the *tree* depth, that is, not the number of "
      "nodes between the root and this node,",
      NULL /* no closure */
+    },
+
+    // eric
+    {"erdex", (getter)Node_erdex, NULL,
+      "If node is a leaf, then same as 'index'. If the node is an inner node, "
+      "then it is the index of the leftmost leaf in its subtree.",
+      NULL /* no closure */
+    },
+    {"numLeaves", (getter)Node_num_leaves, NULL,
+      "If node is a leaf, then this is 1."
+      "If node is an inner node, then this is the number of leaves in the "
+      "subtree rooted at this node.",
+      NULL /* no closure */
     },
 
     {"edgeLabel", (getter)Node_edge_label, NULL,
@@ -348,6 +365,19 @@ static PyObject *
 Node_index(NodeObject *self)
 {
     return PyInt_FromLong(self->node->term_number);
+}
+
+// eric
+static PyObject *
+Node_erdex(NodeObject *self)
+{
+    return PyInt_FromLong(self->node->erdex);
+}
+
+static PyObject *
+Node_num_leaves(NodeObject *self)
+{
+    return PyInt_FromLong(self->node->num_leaves);
 }
 
 static PyObject *

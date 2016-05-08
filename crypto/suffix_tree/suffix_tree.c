@@ -35,7 +35,7 @@ internal_node(node_t *parent, int start, int end, int depth,
     tmp->prev = tmp->next = NULL;
 
     // eric
-    tmp->index = NULL;
+    tmp->erdex = NULL;
     tmp->num_leaves = NULL;
 
     tmp->python_node = NULL;
@@ -289,28 +289,30 @@ st_find(const suffix_tree_t *tree, const char *s)
 }
 
 // eric
-void compute_indices(suffix_tree_t *tree) {
-  int index = 0;
-  compute_indices_helper(tree->root, index);
-}
-
-inline void compute_indices_helper(node_t *n, int &index) {
+inline void compute_indices_helper(node_t *n, int *erdex) {
   if (n->children.head == NULL) {
     // handle leaf case
-    n->index = index;
-    ++index;
+    n->erdex = *erdex;
+    ++(*erdex);
     n->num_leaves = 1;
     return;
   }
 
   node_t *ln;
   for (ln = n->children.head; ln; ln = ln->next) {
-    compute_indices_helper(ln);
+    compute_indices_helper(ln, erdex);
   }
 
-  n->index = n->children.head->index;
+  n->erdex = n->children.head->erdex;
   n->num_leaves = 0;
   for (ln = n->children.head; ln; ln = ln->next) {
     n->num_leaves += ln->num_leaves;
   }
 }
+
+void compute_indices(suffix_tree_t *tree) {
+  int * erdex;
+  *erdex = 0;
+  compute_indices_helper(tree->root, erdex);
+}
+
