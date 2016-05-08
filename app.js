@@ -23,7 +23,7 @@ app.engine('.hbs', exphbs({extname: '.hbs'}));
 app.set('view engine', '.hbs');
 
 // database setup
-mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://localhost/cocoon');
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/cocoon');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
