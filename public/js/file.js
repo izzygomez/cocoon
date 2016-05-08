@@ -5,12 +5,15 @@ $(document).ready(function() {
   K_1 = 'This is a key789';
   K_D = 'This is a key123';
   K_C = 'This is a key234';
+  K_L = 'This is a key777';
   K_1 += K_1
   K_D += K_D;
   K_C += K_C;
+  K_L += K_L;
 
   IV_D = 'This is an IV456';
   IV_C = 'This is an IV567';
+  IV_L = 'This is an IV777';
 
   function F(key, plaintext) {
     var key_hash_bit = sjcl.hash.sha256.hash(key);
@@ -81,7 +84,7 @@ $(document).ready(function() {
             console.log('success!');
             console.log(message);
             $('#message').html(message);
-            round2(data.encryptedIndex);
+            round2(data.encryptedIndex, data.encryptedLeafPos, data.encryptedNum); 
           } else {
             $('#message').html(message);
           }
@@ -95,10 +98,12 @@ $(document).ready(function() {
     });
   };
 
-  function round2(encryptedIndex) {
+  function round2(encryptedIndex, encryptedLeafPos, encryptedNum) {
     console.log('round 2 of communication protocol');
 
     console.log(encryptedIndex);
+    console.log(encryptedLeafPos); 
+    console.log(encryptedNum);
 
     var filename = $('#filename').html();
 
@@ -106,6 +111,9 @@ $(document).ready(function() {
     var length = queryString.length;
 
     var startIndex = decrypt(K_D, IV_D, encryptedIndex);
+    var leafPos = decrypt(K_D, IV_D, encryptedLeafPos); //decrypt leadPos and numLeaves
+    var numLeaves = decrypt(K_D, IV_D, encryptedNumLeaves);
+
     console.log('startIndex: ' + startIndex);
 
     $.ajax({
@@ -113,7 +121,9 @@ $(document).ready(function() {
       type: 'POST',
       data: {
         startIndex: startIndex,
-        length: length
+        length: length,
+        leafPos: leafPos,
+        numLeaves: numLeaves
       },
       success: function(data) {
         var success = data.success;
@@ -123,8 +133,9 @@ $(document).ready(function() {
           console.log('success!');
           console.log(message);
           console.log("C: ", C);
+          console.log("subL:", subL);
           $('#message').html(message);
-          round3(C, data.index);
+          round3(C, data.index, data.subL);
         } else {
           console.log("no success RIP");
           $('#message').html(message);
@@ -136,7 +147,7 @@ $(document).ready(function() {
     });
   };
 
-  function round3(C, index) {
+  function round3(C, index, subL) {
     console.log('check whether strings match');
     var queryString = $('#query').val();
     var length = queryString.length;
@@ -149,7 +160,17 @@ $(document).ready(function() {
     console.log('decryptedC: \'' + decryptedC + "\'");
     if (queryString == decryptedC) {
       console.log('strings match :D');
-      $('#message').html('found at index: ' + index);
+
+      var decryptedIndeces = ""; //If the first one matches, then all match.
+
+      for (var i = 0; i < subL.length; i++) {
+        //Decrypt all possible indeces and send the response back
+        var currentIndex = decrypt(K_L, IV_L, subL[i]);
+        decryptedIndeces = decryptedIndeces.concat(currentIndex + " "); 
+
+      }
+
+      $('#message').html('found at indeces: ' + decryptedIndeces);
     } else {
       console.log('strings do not match');
       $('#message').html('did not find substring');

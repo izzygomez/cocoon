@@ -52,7 +52,9 @@ router.post('/:filename/query/1', function(req, res, next) {
     var found = false;
     for (var i = T.length - 1; i >= 0; --i) {
       if (T[i] in file.D) {
-        encryptedIndex = file.D[ T[i] ];
+        encryptedIndex = file.D[ T[i] ][0]; //Dictionary D now holds an array of three values.
+        encryptedLeafPos = file.D[ T[i] ][1]; // index, leafPos, and num
+        encryptedNum = file.D[ T[i] ][2]; 
         found = true;
         break;
       }
@@ -61,7 +63,9 @@ router.post('/:filename/query/1', function(req, res, next) {
       console.log('found!');
       res.send({ success: true, found: true,
                  message: 'Substring found :D',
-                 encryptedIndex: encryptedIndex });
+                 encryptedIndex: encryptedIndex,
+                 encryptedLeafPos: encryptedLeafPos,
+                 encryptedNum: encryptedNum});
     } else {
       res.send({ success: true, found: false, message: 'Substring not found' });
     }
@@ -92,8 +96,16 @@ router.post('/:filename/query/2', function(req, res, next) {
       C.push(file.C[i + startIndex]);
     }
     console.log('success, sending C');
+
+    console.log('constructing sub-array');
+
+    //constructs lead subArray containing the possible ocurrences. Assumes that
+    //the leaf array will be named file.L
+
+    var subL = file.L.slice(req.body.leafPos, req.body.leafPos + req.body.numLeaves);
+
     res.send({ success: true, message: 'Returning C',
-               C: C, index: startIndex });
+               C: C, index: startIndex, subL: subL });
   });
 });
 
