@@ -11,8 +11,32 @@
 #define TRUE 1
 #define FALSE 0
 
+// eric
+void compute_indices_helper(node_t *n, int *erdex) {
+  if (!n->children.head) {
+    n->erdex = *erdex;
+    n->num_leaves = 1;
+    *erdex += 1;
+    return;
+  }
 
+  node_t *ln;
+  for (ln = n->children.head; ln; ln = ln->next) {
+    compute_indices_helper(ln, erdex);
+  }
 
+  n->erdex = n->children.head->erdex;
+  n->num_leaves = 0;
+  for (ln = n->children.head; ln; ln = ln->next) {
+    n->num_leaves += ln->num_leaves;
+  }
+}
+
+void compute_indices(suffix_tree_t *tree) {
+  int erdex_val = 0;
+  int * erdex = &erdex_val;
+  compute_indices_helper(tree->root, erdex);
+}
 
 /* creates an internal node */
 static node_t *
@@ -235,6 +259,8 @@ make_helper(char *s, int length)
 	    insert(&(head_i->children), term_i);
 	}
 
+  compute_indices(tree);
+
     return tree;
 }
 
@@ -288,31 +314,4 @@ st_find(const suffix_tree_t *tree, const char *s)
     return find_helper(tree, tree->root, s, strlen(s));
 }
 
-// eric
-inline void compute_indices_helper(node_t *n, int *erdex) {
-  if (n->children.head == NULL) {
-    // handle leaf case
-    n->erdex = *erdex;
-    ++(*erdex);
-    n->num_leaves = 1;
-    return;
-  }
-
-  node_t *ln;
-  for (ln = n->children.head; ln; ln = ln->next) {
-    compute_indices_helper(ln, erdex);
-  }
-
-  n->erdex = n->children.head->erdex;
-  n->num_leaves = 0;
-  for (ln = n->children.head; ln; ln = ln->next) {
-    n->num_leaves += ln->num_leaves;
-  }
-}
-
-void compute_indices(suffix_tree_t *tree) {
-  int * erdex;
-  *erdex = 0;
-  compute_indices_helper(tree->root, erdex);
-}
 
