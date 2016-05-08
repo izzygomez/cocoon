@@ -3,9 +3,10 @@ data/
 files/
 uploads/
 pycrypto-2.6.1/
-suffix_tree-2.1/
+build/
 *.log
 *.swp
 *.pyc
 *.json
 *.txt
+PKG-INFO
