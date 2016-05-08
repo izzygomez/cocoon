@@ -8,7 +8,7 @@ from Crypto.Cipher import AES
 import hashlib
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--filename', '-f', default='../files/small_shakespeare.txt',
+parser.add_argument('--filename', '-f', default='../files/shakespeare_poem.txt',
                     help='Path of file to encrypt')
 args = parser.parse_args()
 
@@ -29,12 +29,14 @@ unpad = lambda s : s[0:-ord(s[-1])]
 K_1 = 'This is a key789'
 K_D = 'This is a key123'
 K_C = 'This is a key234'
+K_L = 'This is a key345'
 IV_D = 'This is an IV456'
 IV_C = 'This is an IV567'
 
 K_1 += K_1
 K_D += K_D
 K_C += K_C
+K_L += K_L
 
 filename = args.filename
 
@@ -65,10 +67,16 @@ for leaf in st.leaves:
   parentPL = leaf.parent.pathLabel
   initPath = leafPL[:len(parentPL)+1]
   key = F(K_1, initPath)
+
   index = str(length - len(leaf.pathLabel) + 1)
+  leafpos = str(leaf.erdex)
+  num_leaves = str(leaf.numLeaves)
+  together = index + "---" + leafpos + "---" + num_leaves
+
   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
-  raw = aes_D.encrypt(pad(index))
+  raw = aes_D.encrypt(pad(together))
   value = base64.b64encode(raw)
+
   D[key] = value
 
 print '\tProcessing inner nodes...'
@@ -79,11 +87,18 @@ for innerNode in st.innerNodes:
   parentPL = innerNode.parent.pathLabel
   initPath = nodePL[:len(parentPL)+1]
   key = F(K_1, initPath)
+
   index = str(getIndexOfInnerNode(innerNode, length))
+  leafpos = str(innerNode.erdex)
+  num_leaves = str(innerNode.numLeaves)
+  together = index + "---" + leafpos + "---" + num_leaves
+
   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
-  raw = aes_D.encrypt(pad(index))
+  raw = aes_D.encrypt(pad(together))
   value = base64.b64encode(raw)
+
   D[key] = value
+
 print 'done'
 
 print 'constructing C...'
@@ -96,7 +111,7 @@ for i, c in enumerate(st.string[:-1]):
 print 'done'
 
 print 'saving to file...'
-with open('c_shakespeare.txt', 'w') as fout:
+with open('ciphertext.txt', 'w') as fout:
   fout.write(str(len(D)) + '\n')
   for key in D:
     fout.write(json.dumps({key: D[key]}) + '\n')
@@ -120,11 +135,11 @@ print 'DONE'
 #     C2.append(f.readline()[:-1])
 #     C2[i] = base64.b64decode(C2[i])
 # 
-#   # # check dictionary D
-#   # for key in D2:
-#   #   aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
-#   #   raw = base64.b64decode(D2[key])
-#   #   print key, unpad(aes_D.decrypt(raw))
+#   # check dictionary D
+#   for key in D2:
+#     aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
+#     raw = base64.b64decode(D2[key])
+#     print key, unpad(aes_D.decrypt(raw))
 # 
 #   # # check array C
 #   # C3 = []
