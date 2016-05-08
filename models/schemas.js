@@ -10,7 +10,8 @@ var fileSchema = new mongoose.Schema({
   filename: { type: String, required: true },
   username: { type: String, required: true },
   D: { type: Object, required: true },
-  C: { type: Array, required: true }
+  C: { type: Array, required: true },
+  L: { type: Array, required: true }
 });
 
 module.exports = {

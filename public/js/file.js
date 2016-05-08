@@ -130,6 +130,7 @@ $(document).ready(function() {
         var message = data.message;
         if (success) {
           var C = data.C;
+          var subL = data.subL;
           console.log('success!');
           console.log(message);
           console.log("C: ", C);

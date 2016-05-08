@@ -62,14 +62,19 @@ router.post('/', function(req, res, next) {
             var message = 'You may not upload files with duplicate names!';
             res.render('upload', { user: true, message: message });
           } else {
-            var state = -1; // -1: starting D, 0: D, 1: C
+            var state = -1; // -1: starting D
+                            //  0: D
+                            //  1: C
+                            //  2: L
             var totalD = -1;
             var totalC = -1;
+            var totalL = -1;
             var nD = 0;
             var nC = 0;
-
+            var nL = 0;
             var D = {};
             var C = [];
+            var L = [];
 
             var lineReader = readline.createInterface({
               terminal: false,
@@ -111,21 +116,19 @@ router.post('/', function(req, res, next) {
                   state = 1;
                 }
               } else if (state == 1) {
-                if (nC < totalC - 1) {
+                if (nC < totalC) {
                   C.push(line);
                   ++nC;
                 } else {
-                  C.push(line);
-                  // for (var key in D) {
-                  //   if (D.hasOwnProperty(key)) {
-                  //     console.log(key + ' -> ' + D[key]);
-                  //   }
-                  // }
-                  // for (var i = 0; i < C.length; ++i) {
-                  //   console.log(C[i]);
-                  // }
-                  // console.log(Object.keys(D).length)
-                  // console.log(C.length);
+                  totalL = Number(line);
+                  state = 2;
+                }
+              } else if (state == 2) {
+                if (nL < totalL - 1) {
+                  L.push(line);
+                  ++nL;
+                } else {
+                  L.push(line);
                   User.update({ 'username': user.username },
                               { $push: { 'files': req.file.originalname } },
                               function(err) {
@@ -137,7 +140,8 @@ router.post('/', function(req, res, next) {
                         'filename': req.file.originalname,
                         'username': user.username,
                         'D': D,
-                        'C': C
+                        'C': C,
+                        'L': L
                       });
                       new_file.save();
                       res.render('upload', { user: true,

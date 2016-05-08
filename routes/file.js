@@ -98,7 +98,9 @@ router.post('/:filename/query/2', function(req, res, next) {
     //constructs lead subArray containing the possible ocurrences. Assumes that
     //the leaf array will be named file.L
 
-    var subL = file.L.slice(req.body.leafPos, req.body.leafPos + req.body.numLeaves);
+    var leafPos = Number(req.body.leafPos);
+    var numLeaves = Number(req.body.numLeaves);
+    var subL = file.L.slice(leafPos, leafPos + numLeaves);
 
     res.send({ success: true, message: 'Returning C',
                C: C, index: startIndex, subL: subL });
