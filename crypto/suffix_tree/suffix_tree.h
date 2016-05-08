@@ -27,6 +27,10 @@ struct node {
     struct node *next;
     struct node *prev;
 
+    /* eric */
+    int index;
+    int num_leaves;
+
     /* link to python -- needed to make sure we always get the same
        python object when we ask for a node */
     struct NodeObject *python_node;
