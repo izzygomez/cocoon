@@ -84,7 +84,7 @@ $(document).ready(function() {
             console.log('success!');
             console.log(message);
             $('#message').html(message);
-            round2(data.encryptedIndex, data.encryptedLeafPos, data.encryptedNum); 
+            round2(data.encryptedTuple);
           } else {
             $('#message').html(message);
           }
@@ -98,23 +98,23 @@ $(document).ready(function() {
     });
   };
 
-  function round2(encryptedIndex, encryptedLeafPos, encryptedNum) {
+  function round2(encryptedTuple) {
     console.log('round 2 of communication protocol');
-
-    console.log(encryptedIndex);
-    console.log(encryptedLeafPos); 
-    console.log(encryptedNum);
 
     var filename = $('#filename').html();
 
     var queryString = $('#query').val();
     var length = queryString.length;
 
-    var startIndex = decrypt(K_D, IV_D, encryptedIndex);
-    var leafPos = decrypt(K_D, IV_D, encryptedLeafPos); //decrypt leadPos and numLeaves
-    var numLeaves = decrypt(K_D, IV_D, encryptedNumLeaves);
+    var decryptedTuple = decrypt(K_D, IV_D, encryptedTuple);
+    var values = decryptedTuple.split('---');
+    var startIndex = values[0];
+    var leafPos = values[1];
+    var numLeaves = values[2];
 
     console.log('startIndex: ' + startIndex);
+    console.log('leafPos: ' + leafPos);
+    console.log('numLeaves: ' + numLeaves);
 
     $.ajax({
       url: '/file/' + filename + '/query/2',

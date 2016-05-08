@@ -48,13 +48,11 @@ router.post('/:filename/query/1', function(req, res, next) {
       return;
     }
     var T = req.body.T;
-    var encryptedIndex = -1;
+    var encryptedTuple = '';
     var found = false;
     for (var i = T.length - 1; i >= 0; --i) {
       if (T[i] in file.D) {
-        encryptedIndex = file.D[ T[i] ][0]; //Dictionary D now holds an array of three values.
-        encryptedLeafPos = file.D[ T[i] ][1]; // index, leafPos, and num
-        encryptedNum = file.D[ T[i] ][2]; 
+        encryptedTuple = file.D[ T[i] ];
         found = true;
         break;
       }
@@ -63,9 +61,7 @@ router.post('/:filename/query/1', function(req, res, next) {
       console.log('found!');
       res.send({ success: true, found: true,
                  message: 'Substring found :D',
-                 encryptedIndex: encryptedIndex,
-                 encryptedLeafPos: encryptedLeafPos,
-                 encryptedNum: encryptedNum});
+                 encryptedTuple: encryptedTuple });
     } else {
       res.send({ success: true, found: false, message: 'Substring not found' });
     }
