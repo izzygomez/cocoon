@@ -85,12 +85,13 @@ for leaf in st.leaves:
 
 print '\tProcessing inner nodes...'
 for innerNode in st.innerNodes:
-  if innerNode.stringDepth == 0:
-    continue
-  nodePL = innerNode.pathLabel
-  parentPL = innerNode.parent.pathLabel
-  initPath = nodePL[:len(parentPL)+1]
-  key = F(K_1, initPath)
+  if innerNode.stringDepth > 0:
+    nodePL = innerNode.pathLabel
+    parentPL = innerNode.parent.pathLabel
+    initPath = nodePL[:len(parentPL)+1]
+    key = F(K_1, initPath)
+  else:
+    key = F(K_1, innerNode.pathLabel)
 
   index = str(getIndexOfInnerNode(innerNode, length))
   leafpos = str(innerNode.erdex)
