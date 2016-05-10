@@ -31,22 +31,16 @@ BS = 16
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS) 
 unpad = lambda s : s[0:-ord(s[-1])]
 
-K_1 = 'This is a key789'
-K_3 = 'This is a key987'
-K_4 = 'This is a key191'
-K_D = 'This is a key123'
-K_C = 'This is a key234'
-K_L = 'This is a key777'
+K_1 = 'This is a key789' * 2
+K_2 = 'This is a key173' * 2
+K_3 = 'This is a key987' * 2
+K_4 = 'This is a key191' * 2
+K_D = 'This is a key123' * 2
+K_C = 'This is a key234' * 2
+K_L = 'This is a key777' * 2
 IV_D = 'This is an IV456'
 IV_C = 'This is an IV567'
 IV_L = 'This is an IV777'
-
-K_1 += K_1
-K_3 += K_3
-K_4 += K_4
-K_D += K_D
-K_C += K_C
-K_L += K_L
 
 filename = args.filename
 
@@ -87,7 +81,7 @@ for leaf in st.leaves:
   raw = aes_D.encrypt(pad(together))
   value = base64.b64encode(raw)
 
-  D[key] = value
+  D[key] = (value, [])
 
 print '\tProcessing inner nodes...'
 for innerNode in st.innerNodes:
@@ -107,8 +101,13 @@ for innerNode in st.innerNodes:
   raw = aes_D.encrypt(pad(together))
   value = base64.b64encode(raw)
 
-  D[key] = value
-
+  child = innerNode.firstChild
+  child_list = []
+  while child:
+    path_label = child.pathLabel[:-1] + '$'
+    child_list.append(F(K_2, path_label[:len(innerNode.pathLabel)-1]))
+    child = child.next
+  D[key] = (value, child_list)
 print 'done'
 
 print 'constructing C...'
@@ -130,41 +129,41 @@ for leaf in st.leaves:
   L[leaf.erdex] = value
 print '\tdone'
 
-print 'permuting C...'
-C_p = [None] * (2 ** int(math.ceil(math.log(len(C), 2))))
-for i in xrange(len(C)):
-  p_i = prp.permuteSecure(i, len(C_p), K_3)
-  C_p[p_i] = C[i]
-for i in xrange(len(C), len(C_p)):
-  p_i = prp.permuteSecure(i, len(C_p), K_3)
-  c = random.choice(string.ascii_letters)
-  aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
-  raw = aes_C.encrypt(pad(c))
-  C_p[p_i] = base64.b64encode(raw)
-print '\tdone'
-
-print 'permuting L...'
-L_p = [None] * (2 ** int(math.ceil(math.log(len(L), 2))))
-for i in xrange(len(L)):
-  p_i = prp.permuteSecure(i, len(L_p), K_4)
-  L_p[p_i] = L[i]
-for i in xrange(len(L), len(L_p)):
-  p_i = prp.permuteSecure(i, len(L_p), K_4)
-  aes_L = AES.new(K_L, AES.MODE_CBC, IV_L)
-  raw = aes_L.encrypt(pad(str(i)))
-  L_p[p_i] = base64.b64encode(raw)
-print '\tdone'
+#print 'permuting C...'
+#C_p = [None] * (2 ** int(math.ceil(math.log(len(C), 2))))
+#for i in xrange(len(C)):
+#  p_i = prp.permuteSecure(i, len(C_p), K_3)
+#  C_p[p_i] = C[i]
+#for i in xrange(len(C), len(C_p)):
+#  p_i = prp.permuteSecure(i, len(C_p), K_3)
+#  c = random.choice(string.ascii_letters)
+#  aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
+#  raw = aes_C.encrypt(pad(c))
+#  C_p[p_i] = base64.b64encode(raw)
+#print '\tdone'
+#
+#print 'permuting L...'
+#L_p = [None] * (2 ** int(math.ceil(math.log(len(L), 2))))
+#for i in xrange(len(L)):
+#  p_i = prp.permuteSecure(i, len(L_p), K_4)
+#  L_p[p_i] = L[i]
+#for i in xrange(len(L), len(L_p)):
+#  p_i = prp.permuteSecure(i, len(L_p), K_4)
+#  aes_L = AES.new(K_L, AES.MODE_CBC, IV_L)
+#  raw = aes_L.encrypt(pad(str(i)))
+#  L_p[p_i] = base64.b64encode(raw)
+#print '\tdone'
 
 print 'saving to file...'
 with open('ciphertext.txt', 'w') as fout:
   fout.write(str(len(D)) + '\n')
   for key in D:
     fout.write(json.dumps({key: D[key]}) + '\n')
-  fout.write(str(len(C_p)) + '\n')
-  for c in C_p:
+  fout.write(str(len(C)) + '\n')
+  for c in C:
     fout.write(c + '\n')
-  fout.write(str(len(L_p)) + '\n')
-  for l in L_p:
+  fout.write(str(len(L)) + '\n')
+  for l in L:
     fout.write(l + '\n')
 print 'DONE'
 
