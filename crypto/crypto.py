@@ -54,7 +54,7 @@ def permute(index, inputSize, key):
   else:
     leftHalf = paddedIndex[:bitLength/2]
     rightHalf = paddedIndex[bitLength/2:]
-    rightRandom = hashBinary(rightHalf[:bitLength/2], key, bitLength/2)
+    rightRandom = hashBinary(rightHalf[:bitLength/2+1], key, bitLength/2)
     leftHalf = int(leftHalf, 2)
     rightRandom = int(rightRandom, 2)
     rightXor = leftHalf ^ rightRandom
