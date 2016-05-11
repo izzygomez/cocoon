@@ -31,7 +31,6 @@ $(document).ready(function() {
       },
       success: function(data) {
         var success = data.success;
-        var message = data.message;
         if (success) {
           var C_length = Number(data.C_length);
           var encryptedTuple = data.encryptedTuple;
@@ -39,6 +38,7 @@ $(document).ready(function() {
           // begin round 2
           round2(encryptedTuple, C_length);
         } else {
+          var message = data.message;
           $('#message').html(message);
         }
       },

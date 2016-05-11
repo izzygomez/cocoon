@@ -56,6 +56,10 @@ router.post('/:filename/query/1', function(req, res, next) {
     }
     var T = req.body.T;
 
+    if (T.length < 2) {
+      res.send({ success: false, message: 'Query cannot be empty!' });
+      return;
+    }
 
     // traverse the suffix tree from the root node as far as possible
     var index = 0;
