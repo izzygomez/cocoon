@@ -70,7 +70,6 @@ router.post('/:filename/query/1', function(req, res, next) {
         for (var i = 0; i < children.length; ++i) {
           var decrypted = decrypt(children[i].substring(0, 32), IV_s, T[j]);
           if (decrypted in file.D) {
-            console.log('HOLY COW');
             index = j;
             key = file.D[ decrypted ][0];
             children = file.D[ decrypted ][1];
