@@ -3,6 +3,7 @@
 import argparse
 import base64
 import math
+import time
 import json
 from suffix_tree import SuffixTree
 from Crypto.Cipher import AES
@@ -12,7 +13,11 @@ import string
 
 import prp
 
+random.seed(time.time())
+
 parser = argparse.ArgumentParser()
+parser.add_argument('--ndummy', '-nd', default=0,
+                    help='number of dummy children to store per node')
 parser.add_argument('--filename', '-f', default='../files/shakespeare_poem.txt',
                     help='Path of file to encrypt')
 args = parser.parse_args()
@@ -23,9 +28,9 @@ def getIndexOfInnerNode(node, length):
   return length - len(node.pathLabel) + 1
 
 def F(key, plaintext):
-  keyHash = hashlib.sha256(key.encode()).hexdigest()
-  ptxtHash = hashlib.sha256(plaintext.encode()).hexdigest()
-  return hashlib.sha256((ptxtHash + keyHash).encode()).hexdigest()
+  keyHash = hashlib.sha256(key).hexdigest()
+  ptxtHash = hashlib.sha256(plaintext).hexdigest()
+  return hashlib.sha256((ptxtHash + keyHash)).hexdigest()
 
 BS = 16
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS) 
@@ -84,6 +89,7 @@ for leaf in st.leaves:
   D[key] = (value, [])
 
 print '\tProcessing inner nodes...'
+max_degree = 0
 for innerNode in st.innerNodes:
   if innerNode.stringDepth > 0:
     nodePL = innerNode.pathLabel
@@ -109,6 +115,9 @@ for innerNode in st.innerNodes:
     child_list.append(F(K_2, path_label[:len(innerNode.pathLabel)+1]))
     child = child.next
   D[key] = (value, child_list)
+
+  if max_degree < len(child_list):
+    max_degree = len(child_list)
 print 'done'
 
 print 'constructing C...'
@@ -130,32 +139,58 @@ for leaf in st.leaves:
   L[leaf.erdex] = value
 print '\tdone'
 
-# THIS IMPLEMENTS PERMUTING C AND L
-# UNCOMMENT WHEN READY
-#print 'permuting C...'
-#C_p = [None] * (2 ** int(math.ceil(math.log(len(C), 2))))
-#for i in xrange(len(C)):
-#  p_i = prp.permuteSecure(i, len(C_p), K_3)
-#  C_p[p_i] = C[i]
-#for i in xrange(len(C), len(C_p)):
-#  p_i = prp.permuteSecure(i, len(C_p), K_3)
-#  c = random.choice(string.ascii_letters)
-#  aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
-#  raw = aes_C.encrypt(pad(c))
-#  C_p[p_i] = base64.b64encode(raw)
-#print '\tdone'
-#
-#print 'permuting L...'
-#L_p = [None] * (2 ** int(math.ceil(math.log(len(L), 2))))
-#for i in xrange(len(L)):
-#  p_i = prp.permuteSecure(i, len(L_p), K_4)
-#  L_p[p_i] = L[i]
-#for i in xrange(len(L), len(L_p)):
-#  p_i = prp.permuteSecure(i, len(L_p), K_4)
-#  aes_L = AES.new(K_L, AES.MODE_CBC, IV_L)
-#  raw = aes_L.encrypt(pad(str(i)))
-#  L_p[p_i] = base64.b64encode(raw)
-#print '\tdone'
+print 'adding dummy nodes...'
+for i in xrange(len(D), 2 * len(st.string)):
+  dummyIPL =  ''.join(random.choice(string.lowercase) for i in xrange(32)) + '$'
+  key = F(K_1, dummyIPL)
+
+  dummy_index = '-' + str(random.uniform(0, len(st.string)))
+  leafpos = str(random.uniform(0, len(L)))
+  num_leaves = str(random.uniform(0, max_degree))
+  together = dummy_index + "---" + leafpos + "---" + num_leaves
+
+  aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
+  raw = aes_D.encrypt(pad(together))
+  value = base64.b64encode(raw)
+
+  D[key] = (value, [])
+print '\tdone'
+
+print 'adding dummy node children entries...'
+ndummy = max(0, min(args.ndummy, max_degree))
+for key in D:
+  for i in xrange(ndummy - len(D[key][1])):
+    rand_string = ''.join(random.choice(string.lowercase) for i in xrange(32))
+    D[key][1].append(F(K_2, rand_string))
+print '\tdone'
+
+
+# # THIS IMPLEMENTS PERMUTING C AND L
+# # UNCOMMENT WHEN READY
+# print 'permuting C...'
+# C_p = [None] * (2 ** int(math.ceil(math.log(len(C), 2))))
+# for i in xrange(len(C)):
+#   p_i = prp.permuteSecure(i, len(C_p), K_3)
+#   C_p[p_i] = C[i]
+# for i in xrange(len(C), len(C_p)):
+#   p_i = prp.permuteSecure(i, len(C_p), K_3)
+#   c = random.choice(string.ascii_letters)
+#   aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
+#   raw = aes_C.encrypt(pad(c))
+#   C_p[p_i] = base64.b64encode(raw)
+# print '\tdone'
+
+# # print 'permuting L...'
+# L_p = [None] * (2 ** int(math.ceil(math.log(len(L), 2))))
+# for i in xrange(len(L)):
+#   p_i = prp.permuteSecure(i, len(L_p), K_4)
+#   L_p[p_i] = L[i]
+# for i in xrange(len(L), len(L_p)):
+#   p_i = prp.permuteSecure(i, len(L_p), K_4)
+#   aes_L = AES.new(K_L, AES.MODE_CBC, IV_L)
+#   raw = aes_L.encrypt(pad(str(i)))
+#   L_p[p_i] = base64.b64encode(raw)
+# print '\tdone'
 
 print 'saving to file...'
 with open('ciphertext.txt', 'w') as fout:
