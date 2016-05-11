@@ -82,10 +82,11 @@ $(document).ready(function() {
           var found = data.found;
           if (found) {
             var C_length = Number(data.C_length);
+            var L_length = Number(data.L_length);
             console.log('success!');
             console.log(message);
             $('#message').html(message);
-            round2(data.encryptedTuple, C_length);
+            round2(data.encryptedTuple, C_length, L_length);
           } else {
             $('#message').html(message);
           }
@@ -99,7 +100,7 @@ $(document).ready(function() {
     });
   };
 
-  function round2(encryptedTuple, C_length) {
+  function round2(encryptedTuple, C_length, L_length) {
     console.log('round 2 of communication protocol');
 
     var keyString = $('#key').val();
@@ -125,6 +126,11 @@ $(document).ready(function() {
       C_inds.push(securePermute(Number(startIndex) + i, C_length, K_3));
     }
 
+    var L_inds = [];
+    for (var i = 0; i < numLeaves; ++i) {
+      L_inds.push(securePermute(Number(leafPos) + i, L_length, K_4));
+    }
+
     console.log('startIndex: ' + startIndex);
     console.log('leafPos: ' + leafPos);
     console.log('numLeaves: ' + numLeaves);
@@ -137,7 +143,8 @@ $(document).ready(function() {
         length: length,
         leafPos: leafPos,
         numLeaves: numLeaves,
-        C_inds: C_inds
+        C_inds: C_inds,
+        L_inds: L_inds
       },
       success: function(data) {
         var success = data.success;

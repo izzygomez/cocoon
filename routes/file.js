@@ -85,7 +85,8 @@ router.post('/:filename/query/1', function(req, res, next) {
     res.send({ success: true, found: true,
                message: 'Substring found :D',
                encryptedTuple: encryptedTuple,
-               C_length: file.C.length });
+               C_length: file.C.length,
+               L_length: file.L_length });
   });
 });
 
@@ -110,10 +111,9 @@ router.post('/:filename/query/2', function(req, res, next) {
     }
 
     var C_inds = req.body.C_inds;
-    console.log(C_inds);
     var C = [];
-    for (var i = 0; i < length; ++i) {
-      C.push(file.C[i + startIndex]);
+    for (var i = 0; i < C_inds.length; ++i) {
+      C.push(file.C[ C_inds[i] ]);
     }
     console.log('success, sending C');
 
