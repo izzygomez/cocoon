@@ -82,7 +82,7 @@ for innerNode in st.innerNodes:
     initPath = nodePL[:len(parentPL)+1]
     key = PRF(K_1, initPath)
   else:
-    key = PRF(K_1, innerNode.pathLabel)
+    key = PRF(K_1, '')
 
   index = str(getIndexOfInnerNode(innerNode, length))
   leafpos = str(innerNode.erdex)
