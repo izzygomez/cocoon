@@ -117,7 +117,8 @@ router.post('/', function(req, res, next) {
                 }
               } else if (state == 1) {
                 if (nC < totalC) {
-                  C.push(line);
+                  json = JSON.parse(line);
+                  C.push(json);
                   ++nC;
                 } else {
                   totalL = Number(line);
@@ -125,10 +126,12 @@ router.post('/', function(req, res, next) {
                 }
               } else if (state == 2) {
                 if (nL < totalL - 1) {
-                  L.push(line);
+                  json = JSON.parse(line);
+                  L.push(json);
                   ++nL;
                 } else {
-                  L.push(line);
+                  json = JSON.parse(line);
+                  L.push(json);
                   User.update({ 'username': user.username },
                               { $push: { 'files': req.file.originalname } },
                               function(err) {
