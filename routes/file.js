@@ -84,7 +84,8 @@ router.post('/:filename/query/1', function(req, res, next) {
 
     res.send({ success: true, found: true,
                message: 'Substring found :D',
-               encryptedTuple: encryptedTuple });
+               encryptedTuple: encryptedTuple,
+               fileLength: file.C.length });
   });
 });
 
@@ -107,6 +108,16 @@ router.post('/:filename/query/2', function(req, res, next) {
       res.send({ success: false, message: 'Substring does not exist' });
       return;
     }
+
+    // return permuted Stuff
+    var C_return = [];
+    var C_indices = req.body.C_indices.split(',');
+    console.log('C_indices: ' + C_indices);
+    for (var c_ind in C_indices) {
+      C_return.push(file.C[c_ind]);
+    }
+    // end
+
     var C = [];
     for (var i = 0; i < length; ++i) {
       C.push(file.C[i + startIndex]);
@@ -118,12 +129,22 @@ router.post('/:filename/query/2', function(req, res, next) {
     //constructs lead subArray containing the possible ocurrences. Assumes that
     //the leaf array will be named file.L
 
+    // return L permuted Stuff
+    var L_return = [];
+    var L_indices = req.body.L_indices.split(',');
+    console.log("L_indices: ", L_indices);
+    for (var l_ind in L_indices) {
+      L_return.push(file.L[l_ind]);
+    }
+    // end
+
     var leafPos = Number(req.body.leafPos);
     var numLeaves = Number(req.body.numLeaves);
     var subL = file.L.slice(leafPos, leafPos + numLeaves);
 
     res.send({ success: true, message: 'Returning C',
-               C: C, index: startIndex, subL: subL });
+               C: C, index: startIndex, subL: subL,
+               C_return: C_return.toString(), L_return: L_return.toString() });
   });
 });
 

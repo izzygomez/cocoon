@@ -81,10 +81,11 @@ $(document).ready(function() {
         if (success) {
           var found = data.found;
           if (found) {
+            var fileLength = data.fileLength;
             console.log('success!');
             console.log(message);
             $('#message').html(message);
-            round2(data.encryptedTuple);
+            round2(data.encryptedTuple, fileLength);
           } else {
             $('#message').html(message);
           }
@@ -98,13 +99,15 @@ $(document).ready(function() {
     });
   };
 
-  function round2(encryptedTuple) {
+  function round2(encryptedTuple, fileLength) {
     console.log('round 2 of communication protocol');
 
     var keyString = $('#key').val();
     K_D = keyString.substring(128,160);
     IV_s = 'This is an IV000';
     IV_D = keyString.substring(224,240);
+    K_3 = keyString.substring(64, 96);
+    K_4 = keyString.substring(96, 128);
 
     var filename = $('#filename').html();
 
@@ -117,9 +120,28 @@ $(document).ready(function() {
     var leafPos = values[1];
     var numLeaves = values[2];
 
+    console.log('encryptedTuple: ' + encryptedTuple);
+    console.log('decryptedTuple: ', + decryptedTuple);
     console.log('startIndex: ' + startIndex);
     console.log('leafPos: ' + leafPos);
     console.log('numLeaves: ' + numLeaves);
+    console.log('fileLength: ' + fileLength);
+
+    // Permutation Stuff
+    // for ciphertext array
+    var C_indices = [];
+    for (var i = 0; i < length; i++) {
+      C_indices.push( securePermute(Number(startIndex) + i, fileLength, K_3) );
+    }
+
+    // and for leaf array
+    var L_indices = [];
+    for (var i = 0; i < numLeaves; i++) {
+      L_indices.push( securePermute(Number(leafPos) + i, fileLength+1, K_4) );
+    }
+
+    console.log('C_indices.toString(): ' + C_indices.toString());
+    console.log('L_indices.toString(): ' + L_indices.toString());
 
     $.ajax({
       url: '/file/' + filename + '/query/2',
@@ -128,7 +150,9 @@ $(document).ready(function() {
         startIndex: startIndex,
         length: length,
         leafPos: leafPos,
-        numLeaves: numLeaves
+        numLeaves: numLeaves,
+        C_indices: C_indices.toString(),
+        L_indices: L_indices.toString()
       },
       success: function(data) {
         var success = data.success;
@@ -136,12 +160,14 @@ $(document).ready(function() {
         if (success) {
           var C = data.C;
           var subL = data.subL;
+          var C_return = data.C_return.split(',');
+          var L_return = data.L_return.split(',');
           console.log('success!');
           console.log(message);
           console.log("C: ", C);
           console.log("subL:", subL);
           $('#message').html(message);
-          round3(C, data.index, data.subL);
+          round3(C, data.index, data.subL, C_return, L_return);
         } else {
           console.log("no success RIP");
           $('#message').html(message);
@@ -153,7 +179,7 @@ $(document).ready(function() {
     });
   };
 
-  function round3(C, index, subL) {
+  function round3(C, index, subL, C_return, L_return) {
     console.log('check whether strings match');
 
     var keyString = $('#key').val();
@@ -166,22 +192,36 @@ $(document).ready(function() {
     var queryString = $('#query').val();
     var length = queryString.length;
 
+    console.log('C: ' + C);
+    console.log('C_return: ' + C_return);
+
     var decryptedC = '';
     for (var i = 0; i < length; ++i) {
       decryptedC += decrypt(K_C, IV_C, C[i]);
     }
+
+    var realDecryptedC = '';
+    for (var i = 0; i < length; i++) {
+      realDecryptedC += decrypt(K_C, IV_C, i);
+    }
+
     console.log('queryString: \'' + queryString + "\'");
     console.log('decryptedC: \'' + decryptedC + "\'");
-    if (queryString == decryptedC) {
+    if (queryString == realDecryptedC) { //if (queryString == decryptedC) {
       console.log('strings match :D');
 
       var decryptedIndices = ""; //If the first one matches, then all match.
 
-      for (var i = 0; i < subL.length; i++) {
-        //Decrypt all possible indices and send the response back
-        var currentIndex = decrypt(K_L, IV_L, subL[i]);
-        decryptedIndices = decryptedIndices.concat(currentIndex + ", ");
+      // for (var i = 0; i < subL.length; i++) {
+      //   //Decrypt all possible indices and send the response back
+      //   var currentIndex = decrypt(K_L, IV_L, subL[i]);
+      //   decryptedIndices = decryptedIndices.concat(currentIndex + ", ");
+      //
+      // }
 
+      for (var i in L_return) {
+        var currentIndex = decrypt(K_L, IV_L, i);
+        decryptedIndices = decryptedIndices.concat(currentIndex + ", ");
       }
 
       decryptedIndices = decryptedIndices.slice(0,-2); // eww, trailing commas
