@@ -202,11 +202,11 @@ with open('ciphertext.txt', 'w') as fout:
   fout.write(str(len(D)) + '\n')
   for key in D:
     fout.write(json.dumps({key: D[key]}) + '\n')
-  fout.write(str(len(C)) + '\n')
-  for c in C:
+  fout.write(str(len(C_p)) + '\n')
+  for c in C_p:
     fout.write(c + '\n')
-  fout.write(str(len(L)) + '\n')
-  for l in L:
+  fout.write(str(len(L_p)) + '\n')
+  for l in L_p:
     fout.write(l + '\n')
 print 'DONE'
 
