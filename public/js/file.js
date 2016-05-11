@@ -24,7 +24,6 @@ $(document).ready(function() {
     var ciphertext = sjcl.mode.cbc.encrypt(prp, ptxt_bit, iv_bit, adata);
 
     var actual_ctxt = sjcl.codec.base64.fromBits(ciphertext);
-    console.log(actual_ctxt);
 
     return actual_ctxt;
   };
@@ -79,8 +78,6 @@ $(document).ready(function() {
           if (found) {
             var C_length = Number(data.C_length);
             var L_length = Number(data.L_length);
-            console.log('success!');
-            console.log(message);
             $('#message').html(message);
             round2(data.encryptedTuple, C_length, L_length);
           } else {
@@ -97,8 +94,6 @@ $(document).ready(function() {
   };
 
   function round2(encryptedTuple, C_length, L_length) {
-    console.log('round 2 of communication protocol');
-
     var keyString = $('#key').val();
     var K_D = keyString.substring(128,160);
     var IV_s = 'This is an IV000';
@@ -144,13 +139,10 @@ $(document).ready(function() {
         if (success) {
           var C = data.C;
           var subL = data.subL;
-          console.log('success!');
-          console.log(message);
           $('#message').html(message);
           var L = data.L;
           round3(C, data.index, data.subL, L);
         } else {
-          console.log("no success RIP");
           $('#message').html(message);
         }
       },
@@ -161,8 +153,6 @@ $(document).ready(function() {
   };
 
   function round3(C, index, subL, L) {
-    console.log('check whether strings match');
-
     var keyString = $('#key').val();
     K_C = keyString.substring(160,192);
     K_L = keyString.substring(192,224);
@@ -173,28 +163,20 @@ $(document).ready(function() {
     var queryString = $('#query').val();
     var length = queryString.length;
 
-    console.log('C: ' + C);
-
     var decryptedC = '';
     for (var i = 0; i < length; ++i) {
       decryptedC += decrypt(K_C, IV_C, C[i]);
     }
 
-    if (queryString == decryptedC) { //if (queryString == decryptedC) {
-      console.log('strings match :D');
-
-      var decryptedIndices = ""; //If the first one matches, then all match.
-
+    if (queryString == decryptedC) {
+      var decryptedIndices = "";
       for (var i = 0; i < L.length; i++) {
         var currentIndex = decrypt(K_L, IV_L, L[i]);
         decryptedIndices = decryptedIndices.concat(currentIndex + ", ");
       }
-
-      decryptedIndices = decryptedIndices.slice(0,-2); // eww, trailing commas
-
+      decryptedIndices = decryptedIndices.slice(0,-2);
       $('#message').html('found at indices: ' + decryptedIndices);
     } else {
-      console.log('strings do not match');
       $('#message').html('did not find substring');
     }
   };
