@@ -27,7 +27,6 @@ router.all('*', authenticate);
 router.get('/:filename', function(req, res, next) {
   var user = req.session.currentUser;
   var message = 'Logged in as: ' + user.username;
-
   var filename = req.params.filename;
 
   File.findOne({ 'username': user.username, 'filename': filename },
@@ -82,8 +81,7 @@ router.post('/:filename/query/1', function(req, res, next) {
 
     res.send({ success: true,
                encryptedTuple: encryptedTuple,
-               C_length: file.C.length,
-               L_length: file.L.length });
+               C_length: file.C.length });
   });
 });
 
@@ -104,14 +102,30 @@ router.post('/:filename/query/2', function(req, res, next) {
       C.push(file.C[ C_inds[i] ]);
     }
 
+    // send array C back to the client
+    res.send({ success: true, C: C, L_length: file.L.length });
+  });
+});
+
+router.post('/:filename/query/3', function(req, res, next) {
+  var user = req.session.currentUser;
+  var filename = req.params.filename;
+  File.findOne({ 'username': user.username, 'filename': filename },
+               function(err, file) {
+    if (err || file == null) {
+      res.send({ success: false, message: 'File not found!' });
+      return;
+    }
+
+    // fill up L with the indices of occurrence of the query string
     var L_inds = req.body.L_inds;
     L = [];
     for (var i = 0; i < L_inds.length; ++i) {
       L.push(file.L[ L_inds[i] ]);
     }
 
-    res.send({ success: true, message: 'Returning C',
-               C: C, L: L });
+    // send the indices of occurrence to the client
+    res.send({ success: true, L: L });
   });
 });
 

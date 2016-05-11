@@ -34,11 +34,10 @@ $(document).ready(function() {
         var message = data.message;
         if (success) {
           var C_length = Number(data.C_length);
-          var L_length = Number(data.L_length);
           var encryptedTuple = data.encryptedTuple;
 
           // begin round 2
-          round2(encryptedTuple, C_length, L_length);
+          round2(encryptedTuple, C_length);
         } else {
           $('#message').html(message);
         }
@@ -49,7 +48,7 @@ $(document).ready(function() {
     });
   };
 
-  function round2(encryptedTuple, C_length, L_length) {
+  function round2(encryptedTuple, C_length) {
     var keyString = $('#key').val();
     var filename = $('#filename').html();
 
@@ -66,40 +65,34 @@ $(document).ready(function() {
     var IV_D = keyString.substring(224, 240);
     var decryptedTuple = decrypt(K_D, IV_D, encryptedTuple[0]);
     var values = decryptedTuple.split('---');
-    var startIndex = values[0];
-    var leafPos = values[1];
-    var numLeaves = values[2];
+    var startIndex = Number(values[0]);
+    var leafPos = Number(values[1]);
+    var numLeaves = Number(values[2]);
 
     // compute the indices in C to query for
     var queryString = $('#query').val();
     var K_3 = keyString.substring(64, 96);
     var C_inds = [];
     for (var i = 0; i < queryString.length; ++i) {
-      C_inds.push(securePermute(Number(startIndex) + i, C_length, K_3));
-    }
-
-    var K_4 = keyString.substring(96, 128);
-    var L_inds = [];
-    for (var i = 0; i < numLeaves; ++i) {
-      L_inds.push(securePermute(Number(leafPos) + i, L_length, K_4));
+      C_inds.push(securePermute(startIndex + i, C_length, K_3));
     }
 
     $.ajax({
       url: '/file/' + filename + '/query/2',
       type: 'POST',
       data: {
-        C_inds: C_inds,
-        L_inds: L_inds
+        C_inds: C_inds
       },
       success: function(data) {
         var success = data.success;
-        var message = data.message;
         if (success) {
-          $('#message').html(message);
           var C = data.C;
-          var L = data.L;
-          round3(C, L);
+          var L_length = Number(data.L_length);
+
+          // begin round 3
+          round3(C, leafPos, numLeaves, L_length);
         } else {
+          var message = data.message;
           $('#message').html(message);
         }
       },
@@ -109,51 +102,92 @@ $(document).ready(function() {
     });
   };
 
-  function round3(C, L) {
+  function round3(C, leafPos, numLeaves, L_length) {
     var keyString = $('#key').val();
-    K_C = keyString.substring(160, 192);
-    K_L = keyString.substring(192, 224);
-    IV_C = keyString.substring(240, 256);
-    IV_L = keyString.substring(256, 272);
-    IV_s = 'This is an IV000';
-
-    var queryString = $('#query').val();
-    var length = queryString.length;
+    var filename = $('#filename').html();
 
     // authenticate
     var K_MAC_C = keyString.substring(304, 336);
     var IV_MAC_C = keyString.substring(384, 400);
     for (var i = 0; i < C.length; ++i) {
       if (CBC_MAC(K_MAC_C, IV_MAC_C, C[i][0]) != C[i][1]) {
-        $('message').html('CBC-MAC failed! (2)');
-        return;
-      }
-    }
-    var K_MAC_L = keyString.substring(336, 368);
-    var IV_MAC_L = keyString.substring(400, 416);
-    for (var i = 0; i < L.length; ++i) {
-      if (CBC_MAC(K_MAC_L, IV_MAC_L, L[i][0]) != L[i][1]) {
-        $('message').html('CBC-MAC failed! (3)');
+        $('message').html('CBC-MAC failed!');
         return;
       }
     }
 
+    // decrypt C
+    var K_C = keyString.substring(160, 192);
+    var IV_C = keyString.substring(240, 256);
     var decryptedC = '';
     for (var i = 0; i < C.length; ++i) {
       decryptedC += decrypt(K_C, IV_C, C[i][0]);
     }
 
-    if (queryString == decryptedC) {
-      var decryptedIndices = "";
-      for (var i = 0; i < L.length; i++) {
-        var currentIndex = decrypt(K_L, IV_L, L[i][0]);
-        decryptedIndices = decryptedIndices.concat(currentIndex + ", ");
-      }
-      decryptedIndices = decryptedIndices.slice(0,-2);
-      $('#message').html('found at indices: ' + decryptedIndices);
-    } else {
-      $('#message').html('did not find substring');
+    // if C decrypted is not equal to the query, then the query is not
+    // a subset of the stored string
+    var queryString
+    if (decryptedC != queryString) {
+      $('message').html('String not found!');
     }
+
+    // if C decrypted is equal to the query, then the query is a substring!
+    // make another request to the server
+
+    // compute the permuted indices in L to request for
+    var K_4 = keyString.substring(96, 128);
+    var L_inds = [];
+    for (var i = 0; i < numLeaves; ++i) {
+      L_inds.push(securePermute(leafPos + i, L_length, K_4));
+    }
+
+    // send the indices to the server
+    $.ajax({
+      url: '/file/' + filename + '/query/3',
+      type: 'POST',
+      data: {
+        L_inds: L_inds
+      },
+      success: function(data) {
+        var success = data.success;
+        if (success) {
+          var L = data.L;
+
+          // begin the last round of computation
+          round4(L);
+        } else {
+          var message = data.message;
+          $('#message').html(message);
+        }
+      },
+      error: function(xhr, status, error) {
+        console.log('oh noo');
+      }
+    });
+  };
+
+  function round4(L) {
+    var keyString = $('#key').val();
+
+    // authenticate
+    var K_MAC_L = keyString.substring(336, 368);
+    var IV_MAC_L = keyString.substring(400, 416);
+    for (var i = 0; i < L.length; ++i) {
+      if (CBC_MAC(K_MAC_L, IV_MAC_L, L[i][0]) != L[i][1]) {
+        $('message').html('CBC-MAC failed!');
+        return;
+      }
+    }
+
+    // decrypt the indices
+    K_L = keyString.substring(192, 224);
+    IV_L = keyString.substring(256, 272);
+    var message = 'Found at indices: ';
+    for (var i = 0; i < L.length; ++i) {
+      var index = decrypt(K_L, IV_L, L[i][0]);
+      message += (index + ', ');
+    }
+    $('#message').html(message.slice(0, -2));
   };
 
   $('#submit').click(round1);
