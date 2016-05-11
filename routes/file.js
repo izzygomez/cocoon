@@ -1,9 +1,17 @@
 var express = require('express');
 var schemas = require('../models/schemas');
+var crypto = require('./crypto');
+var sjcl = require('sjcl');
 var router = express.Router();
 
 var User = schemas.User;
 var File = schemas.File;
+
+var F = crypto.F;
+var encrypt = crypto.encrypt;
+var decrypt = crypto.decrypt;
+
+var IV_s = 'This is an IV000';
 
 var authenticate = function(req, res, next) {
   if (req.session.currentUser) {
@@ -48,23 +56,38 @@ router.post('/:filename/query/1', function(req, res, next) {
       return;
     }
     var T = req.body.T;
-    var encryptedTuple = '';
+    // var encryptedTuple = '';
     var found = false;
-    for (var i = T.length - 1; i >= 0; --i) {
-      if (T[i] in file.D) {
-        encryptedTuple = file.D[ T[i] ];
-        found = true;
-        break;
+
+    var index = 0;
+    var key = file.D[ T[index] ][0];
+    var children = file.D[ T[index] ][1];
+    console.log(children.length);
+    console.log(children);
+    while (index < T.length) {
+      var brake = false;
+      for (var j = index + 1; j < T.length; ++j) {
+        for (var i = 0; i < children.length; ++i) {
+          var decrypted = decrypt(children[i].substring(0, 32), IV_s, T[j]);
+          if (decrypted in file.D) {
+            console.log('HOLY COW');
+            index = j;
+            key = file.D[ decrypted ][0];
+            children = file.D[ decrypted ][1];
+            brake = true;
+          }
+          if (brake) break;
+        }
+        if (brake) break;
       }
+      if (!brake) break;
     }
-    if (found) {
-      console.log('found!');
-      res.send({ success: true, found: true,
-                 message: 'Substring found :D',
-                 encryptedTuple: encryptedTuple });
-    } else {
-      res.send({ success: true, found: false, message: 'Substring not found' });
-    }
+
+    var encryptedTuple = key;
+
+    res.send({ success: true, found: true,
+               message: 'Substring found :D',
+               encryptedTuple: encryptedTuple });
   });
 });
 

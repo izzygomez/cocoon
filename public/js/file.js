@@ -3,14 +3,17 @@ $(document).ready(function() {
   sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."]();
 
   K_1 = 'This is a key789';
+  K_2 = 'This is a key173';
   K_D = 'This is a key123';
   K_C = 'This is a key234';
   K_L = 'This is a key777';
-  K_1 += K_1
+  K_1 += K_1;
+  K_2 += K_2;
   K_D += K_D;
   K_C += K_C;
   K_L += K_L;
 
+  IV_s = 'This is an IV000';
   IV_D = 'This is an IV456';
   IV_C = 'This is an IV567';
   IV_L = 'This is an IV777';
@@ -59,10 +62,11 @@ $(document).ready(function() {
   function round1() {
     var queryString = $('#query').val();
     var filename = $('#filename').html();
-    var T = [];
+    var T = [ F(K_1, '') ];
     for (var i = 0; i < queryString.length; i++) {
+      var key = F(K_2, queryString.substring(0, i + 1)).substring(0, 32);
       var ctxt = F(K_1, queryString.substring(0, i + 1));
-      T.push(ctxt);
+      T.push(encrypt(key, IV_s, ctxt));
     }
 
     console.log(T);
