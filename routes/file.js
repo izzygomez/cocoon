@@ -1,7 +1,7 @@
 var express = require('express');
 var schemas = require('../models/schemas');
 var crypto = require('./crypto');
-var sjcl = require('sjcl');
+var sjcl = require('../public/js/sjcl');
 var router = express.Router();
 
 var User = schemas.User;
@@ -84,7 +84,8 @@ router.post('/:filename/query/1', function(req, res, next) {
 
     res.send({ success: true, found: true,
                message: 'Substring found :D',
-               encryptedTuple: encryptedTuple });
+               encryptedTuple: encryptedTuple,
+               C_length: file.C.length });
   });
 });
 
@@ -107,6 +108,9 @@ router.post('/:filename/query/2', function(req, res, next) {
       res.send({ success: false, message: 'Substring does not exist' });
       return;
     }
+
+    var C_inds = req.body.C_inds;
+    console.log(C_inds);
     var C = [];
     for (var i = 0; i < length; ++i) {
       C.push(file.C[i + startIndex]);

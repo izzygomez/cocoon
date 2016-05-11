@@ -81,10 +81,11 @@ $(document).ready(function() {
         if (success) {
           var found = data.found;
           if (found) {
+            var C_length = Number(data.C_length);
             console.log('success!');
             console.log(message);
             $('#message').html(message);
-            round2(data.encryptedTuple);
+            round2(data.encryptedTuple, C_length);
           } else {
             $('#message').html(message);
           }
@@ -98,13 +99,15 @@ $(document).ready(function() {
     });
   };
 
-  function round2(encryptedTuple) {
+  function round2(encryptedTuple, C_length) {
     console.log('round 2 of communication protocol');
 
     var keyString = $('#key').val();
-    K_D = keyString.substring(128,160);
-    IV_s = 'This is an IV000';
-    IV_D = keyString.substring(224,240);
+    var K_D = keyString.substring(128,160);
+    var IV_s = 'This is an IV000';
+    var IV_D = keyString.substring(224,240);
+    var K_3 = keyString.substring(64, 96);
+    var K_4 = keyString.substring(96, 128);
 
     var filename = $('#filename').html();
 
@@ -117,6 +120,11 @@ $(document).ready(function() {
     var leafPos = values[1];
     var numLeaves = values[2];
 
+    var C_inds = [];
+    for (var i = 0; i < length; ++i) {
+      C_inds.push(securePermute(Number(startIndex) + i, C_length, K_3));
+    }
+
     console.log('startIndex: ' + startIndex);
     console.log('leafPos: ' + leafPos);
     console.log('numLeaves: ' + numLeaves);
@@ -128,7 +136,8 @@ $(document).ready(function() {
         startIndex: startIndex,
         length: length,
         leafPos: leafPos,
-        numLeaves: numLeaves
+        numLeaves: numLeaves,
+        C_inds: C_inds
       },
       success: function(data) {
         var success = data.success;

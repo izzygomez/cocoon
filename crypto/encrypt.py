@@ -170,32 +170,32 @@ for key in D:
 print '\tdone'
 
 
-# # THIS IMPLEMENTS PERMUTING C AND L
-# # UNCOMMENT WHEN READY
-# print 'permuting C...'
-# C_p = [None] * (2 ** int(math.ceil(math.log(len(C), 2))))
-# for i in xrange(len(C)):
-#   p_i = prp.permuteSecure(i, len(C_p), K_3)
-#   C_p[p_i] = C[i]
-# for i in xrange(len(C), len(C_p)):
-#   p_i = prp.permuteSecure(i, len(C_p), K_3)
-#   c = random.choice(string.ascii_letters)
-#   aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
-#   raw = aes_C.encrypt(pad(c))
-#   C_p[p_i] = base64.b64encode(raw)
-# print '\tdone'
+# THIS IMPLEMENTS PERMUTING C AND L
+# UNCOMMENT WHEN READY
+print 'permuting C...'
+C_p = [None] * (2 ** int(math.ceil(math.log(len(C), 2))))
+for i in xrange(len(C)):
+  p_i = prp.permuteSecure(i, len(C_p), K_3)
+  C_p[p_i] = C[i]
+for i in xrange(len(C), len(C_p)):
+  p_i = prp.permuteSecure(i, len(C_p), K_3)
+  c = random.choice(string.ascii_letters)
+  aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
+  raw = aes_C.encrypt(pad(c))
+  C_p[p_i] = base64.b64encode(raw)
+print '\tdone'
 
-# # print 'permuting L...'
-# L_p = [None] * (2 ** int(math.ceil(math.log(len(L), 2))))
-# for i in xrange(len(L)):
-#   p_i = prp.permuteSecure(i, len(L_p), K_4)
-#   L_p[p_i] = L[i]
-# for i in xrange(len(L), len(L_p)):
-#   p_i = prp.permuteSecure(i, len(L_p), K_4)
-#   aes_L = AES.new(K_L, AES.MODE_CBC, IV_L)
-#   raw = aes_L.encrypt(pad(str(i)))
-#   L_p[p_i] = base64.b64encode(raw)
-# print '\tdone'
+print 'permuting L...'
+L_p = [None] * (2 ** int(math.ceil(math.log(len(L), 2))))
+for i in xrange(len(L)):
+  p_i = prp.permuteSecure(i, len(L_p), K_4)
+  L_p[p_i] = L[i]
+for i in xrange(len(L), len(L_p)):
+  p_i = prp.permuteSecure(i, len(L_p), K_4)
+  aes_L = AES.new(K_L, AES.MODE_CBC, IV_L)
+  raw = aes_L.encrypt(pad(str(i)))
+  L_p[p_i] = base64.b64encode(raw)
+print '\tdone'
 
 print 'saving to file...'
 with open('ciphertext.txt', 'w') as fout:
