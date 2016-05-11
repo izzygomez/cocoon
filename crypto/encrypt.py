@@ -130,6 +130,8 @@ for leaf in st.leaves:
   L[leaf.erdex] = value
 print '\tdone'
 
+# THIS IMPLEMENTS PERMUTING C AND L
+# UNCOMMENT WHEN READY
 #print 'permuting C...'
 #C_p = [None] * (2 ** int(math.ceil(math.log(len(C), 2))))
 #for i in xrange(len(C)):
