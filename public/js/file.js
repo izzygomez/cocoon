@@ -128,7 +128,6 @@ $(document).ready(function() {
     // a subset of the stored string
     var queryString = $('#query').val();
     if (decryptedC !== queryString) {
-      console.log('iiii');
       $('#message').html('String not found!');
       return;
     }

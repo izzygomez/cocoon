@@ -49,9 +49,7 @@ IV_MAC_D = longKeyGen[368:384]
 IV_MAC_C = longKeyGen[384:400]
 IV_MAC_L = longKeyGen[400:416]
 
-K_3 = 'This is a key123' * 2
-
-print('Save this key! You will not be able to make queries to your file without this key: ' + longKeyGen[:64] + K_3 + longKeyGen[96:])
+print('Save this key! You will not be able to make queries to your file without this key: ' + longKeyGen)
 print('\n')
 
 filename = args.filename
@@ -159,9 +157,6 @@ C_p = [None] * (2 ** int(math.ceil(math.log(len(C), 2))))
 for i in xrange(len(C)):
   p_i = permuteSecure(i, len(C_p), K_3)
   C_p[p_i] = C[i]
-#   print p_i, AES_Dec(K_C, IV_C, C[i][0]);
-#   print 'C_p[', p_i, '] =', AES_Dec(K_C, IV_C, C[i][0]), C_p[p_i]
-  #print i, p_i
 for i in xrange(len(C), len(C_p)):
   p_i = permuteSecure(i, len(C_p), K_3)
   c = random.choice(string.ascii_letters)
@@ -193,7 +188,6 @@ with open('ciphertext.txt', 'w') as fout:
   fout.write(str(len(L_p)) + '\n')
   for l in L_p:
     fout.write(json.dumps(l) + '\n')
-    # fout.write(l + '\n')
 print 'DONE'
 
 # # to parse ciphertext
