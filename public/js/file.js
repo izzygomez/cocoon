@@ -175,6 +175,8 @@ $(document).ready(function() {
 
       }
 
+      decryptedIndices = decryptedIndices.slice(0,-2); // eww, trailing commas
+
       $('#message').html('found at indices: ' + decryptedIndices);
     } else {
       console.log('strings do not match');
