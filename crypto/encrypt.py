@@ -11,7 +11,6 @@ import hashlib
 import random
 import string
 from strgen import StringGenerator
-import prp
 
 from crypto import PRF, CBC_MAC, AES_Enc, AES_Dec, \
                    permuteSecure, unpermuteSecure
@@ -50,8 +49,9 @@ IV_MAC_D = longKeyGen[368:384]
 IV_MAC_C = longKeyGen[384:400]
 IV_MAC_L = longKeyGen[400:416]
 
+K_3 = 'This is a key123' * 2
 
-print('Save this key! You will not be able to make queries to your file without this key: ' + longKeyGen)
+print('Save this key! You will not be able to make queries to your file without this key: ' + longKeyGen[:64] + K_3 + longKeyGen[96:])
 print('\n')
 
 filename = args.filename
@@ -157,10 +157,13 @@ print '\tdone'
 print 'permuting C...'
 C_p = [None] * (2 ** int(math.ceil(math.log(len(C), 2))))
 for i in xrange(len(C)):
-  p_i = prp.permuteSecure(i, len(C_p), K_3)
+  p_i = permuteSecure(i, len(C_p), K_3)
   C_p[p_i] = C[i]
+#   print p_i, AES_Dec(K_C, IV_C, C[i][0]);
+#   print 'C_p[', p_i, '] =', AES_Dec(K_C, IV_C, C[i][0]), C_p[p_i]
+  #print i, p_i
 for i in xrange(len(C), len(C_p)):
-  p_i = prp.permuteSecure(i, len(C_p), K_3)
+  p_i = permuteSecure(i, len(C_p), K_3)
   c = random.choice(string.ascii_letters)
   enc = AES_Enc(K_C, IV_C, c)
   mac = CBC_MAC(K_MAC_C, IV_MAC_C, enc)
@@ -170,10 +173,10 @@ print '\tdone'
 print 'permuting L...'
 L_p = [None] * (2 ** int(math.ceil(math.log(len(L), 2))))
 for i in xrange(len(L)):
-  p_i = prp.permuteSecure(i, len(L_p), K_4)
+  p_i = permuteSecure(i, len(L_p), K_4)
   L_p[p_i] = L[i]
 for i in xrange(len(L), len(L_p)):
-  p_i = prp.permuteSecure(i, len(L_p), K_4)
+  p_i = permuteSecure(i, len(L_p), K_4)
   enc = AES_Enc(K_L, IV_L, str(i))
   mac = CBC_MAC(K_MAC_L, IV_MAC_L, enc)
   L_p[p_i] = [enc, mac]
@@ -185,9 +188,8 @@ with open('ciphertext.txt', 'w') as fout:
   for key in D:
     fout.write(json.dumps({key: D[key]}) + '\n')
   fout.write(str(len(C_p)) + '\n')
-  for c in C_p:
-    fout.write(json.dumps(c) + '\n')
-    # fout.write(c + '\n')
+  for i in xrange(len(C_p)):
+    fout.write(json.dumps(C_p[i]) + '\n')
   fout.write(str(len(L_p)) + '\n')
   for l in L_p:
     fout.write(json.dumps(l) + '\n')
