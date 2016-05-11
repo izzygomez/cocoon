@@ -9,7 +9,6 @@ Setup (Linux)
 git clone https://github.com/izzygomez/cocoon
 cd cocoon/
 ```
-
 2. Install String Generator
 ```bash
 unzip StringGenerator-0.1.3.zip
@@ -17,19 +16,16 @@ cd StringGenerator-0.1.3/
 sudo python setup.py install
 cd ..
 ```
-
 3. Install SuffixTree
 ```bash
 cd suffix_tree/
 sudo python setup.py install
 cd ..
 ```
-
 4. Install PyCrypto
 ```bash
 sudo pip install pycrypto
 ```
-
 5. Install Node modules
 ```bash
 npm install
@@ -42,7 +38,6 @@ To run the server locally
 mkdir data
 mongod --dbpath data/
 ```
-
 2. Run the server
 ```bash
 npm start
