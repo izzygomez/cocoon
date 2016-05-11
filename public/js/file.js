@@ -1,6 +1,8 @@
 $(document).ready(function() {
 
   function round1() {
+    var filename = $('#filename').html();
+
     // make sure the entered key is the correct length
     var keyString = $('#key').val();
     if (keyString.length != 416) {
@@ -21,7 +23,6 @@ $(document).ready(function() {
     }
 
     // send the server encryptions of all the prefixes of query string
-    var filename = $('#filename').html();
     $.ajax({
       url: '/file/' + filename + '/query/1',
       type: 'POST',
@@ -34,7 +35,10 @@ $(document).ready(function() {
         if (success) {
           var C_length = Number(data.C_length);
           var L_length = Number(data.L_length);
-          round2(data.encryptedTuple, C_length, L_length);
+          var encryptedTuple = data.encryptedTuple;
+
+          // begin round 2
+          round2(encryptedTuple, C_length, L_length);
         } else {
           $('#message').html(message);
         }
@@ -47,39 +51,34 @@ $(document).ready(function() {
 
   function round2(encryptedTuple, C_length, L_length) {
     var keyString = $('#key').val();
-    var K_3 = keyString.substring(64, 96);
-    var K_4 = keyString.substring(96, 128);
-    var K_D = keyString.substring(128, 160);
-    var IV_D = keyString.substring(224, 240);
-    var IV_s = 'This is an IV000';
-
     var filename = $('#filename').html();
-
-    var queryString = $('#query').val();
-    var length = queryString.length;
 
     // authenticate
     var K_MAC_D = keyString.substring(272, 304);
     var IV_MAC_D = keyString.substring(368, 384);
     if (CBC_MAC(K_MAC_D, IV_MAC_D, encryptedTuple[0]) != encryptedTuple[1]) {
-      console.log(encryptedTuple[0]);
-      console.log(encrypt(K_MAC_D, IV_MAC_D, encryptedTuple[0]));
-      console.log(encryptedTuple[1]);
-      $('#message').html('CBC-MAC failed! (1)');
+      $('#message').html('CBC-MAC failed!');
       return;
     }
 
+    // decrypt the start index, leaf position, and number of subtree leaves
+    var K_D = keyString.substring(128, 160);
+    var IV_D = keyString.substring(224, 240);
     var decryptedTuple = decrypt(K_D, IV_D, encryptedTuple[0]);
     var values = decryptedTuple.split('---');
     var startIndex = values[0];
     var leafPos = values[1];
     var numLeaves = values[2];
 
+    // compute the indices in C to query for
+    var queryString = $('#query').val();
+    var K_3 = keyString.substring(64, 96);
     var C_inds = [];
-    for (var i = 0; i < length; ++i) {
+    for (var i = 0; i < queryString.length; ++i) {
       C_inds.push(securePermute(Number(startIndex) + i, C_length, K_3));
     }
 
+    var K_4 = keyString.substring(96, 128);
     var L_inds = [];
     for (var i = 0; i < numLeaves; ++i) {
       L_inds.push(securePermute(Number(leafPos) + i, L_length, K_4));
@@ -89,9 +88,6 @@ $(document).ready(function() {
       url: '/file/' + filename + '/query/2',
       type: 'POST',
       data: {
-        length: length,
-        leafPos: leafPos,
-        numLeaves: numLeaves,
         C_inds: C_inds,
         L_inds: L_inds
       },

@@ -90,7 +90,6 @@ router.post('/:filename/query/1', function(req, res, next) {
 router.post('/:filename/query/2', function(req, res, next) {
   var user = req.session.currentUser;
   var filename = req.params.filename;
-  var length = Number(req.body.length);
   File.findOne({ 'username': user.username, 'filename': filename },
                function(err, file) {
     if (err || file == null) {
@@ -98,6 +97,7 @@ router.post('/:filename/query/2', function(req, res, next) {
       return;
     }
 
+    // construct the C array to send back to the client
     var C_inds = req.body.C_inds;
     var C = [];
     for (var i = 0; i < C_inds.length; ++i) {
