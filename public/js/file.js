@@ -166,16 +166,16 @@ $(document).ready(function() {
     if (queryString == decryptedC) {
       console.log('strings match :D');
 
-      var decryptedIndeces = ""; //If the first one matches, then all match.
+      var decryptedIndices = ""; //If the first one matches, then all match.
 
       for (var i = 0; i < subL.length; i++) {
-        //Decrypt all possible indeces and send the response back
+        //Decrypt all possible indices and send the response back
         var currentIndex = decrypt(K_L, IV_L, subL[i]);
-        decryptedIndeces = decryptedIndeces.concat(currentIndex + " "); 
+        decryptedIndices = decryptedIndices.concat(currentIndex + ", ");
 
       }
 
-      $('#message').html('found at indeces: ' + decryptedIndeces);
+      $('#message').html('found at indices: ' + decryptedIndices);
     } else {
       console.log('strings do not match');
       $('#message').html('did not find substring');
