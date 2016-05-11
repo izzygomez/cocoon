@@ -49,6 +49,11 @@ $(document).ready(function() {
 
     var keyString = $('#key').val();
 
+    if (keyString.length != 272) {
+      $('#message').html('Error: The key you entered is invalid.');
+      return;
+    }
+
     K_1 = keyString.substring(0,32);
     K_2 = keyString.substring(32,64);
     IV_s = 'This is an IV000';
