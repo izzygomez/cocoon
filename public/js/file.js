@@ -1,19 +1,18 @@
 $(document).ready(function() {
+
   function round1() {
-    var queryString = $('#query').val();
-    var filename = $('#filename').html();
-
+    // make sure the entered key is the correct length
     var keyString = $('#key').val();
-
     if (keyString.length != 416) {
       $('#message').html('Error: The key you entered is invalid.');
       return;
     }
 
+    // construct array T from the query string
+    var queryString = $('#query').val();
     K_1 = keyString.substring(0, 32);
     K_2 = keyString.substring(32, 64);
     IV_s = 'This is an IV000';
-
     var T = [ F(K_1, '') ];
     for (var i = 0; i < queryString.length; i++) {
       var key = F(K_2, queryString.substring(0, i + 1)).substring(0, 32);
@@ -21,6 +20,8 @@ $(document).ready(function() {
       T.push(encrypt(key, IV_s, ctxt));
     }
 
+    // send the server encryptions of all the prefixes of query string
+    var filename = $('#filename').html();
     $.ajax({
       url: '/file/' + filename + '/query/1',
       type: 'POST',
@@ -31,15 +32,9 @@ $(document).ready(function() {
         var success = data.success;
         var message = data.message;
         if (success) {
-          var found = data.found;
-          if (found) {
-            var C_length = Number(data.C_length);
-            var L_length = Number(data.L_length);
-            $('#message').html(message);
-            round2(data.encryptedTuple, C_length, L_length);
-          } else {
-            $('#message').html(message);
-          }
+          var C_length = Number(data.C_length);
+          var L_length = Number(data.L_length);
+          round2(data.encryptedTuple, C_length, L_length);
         } else {
           $('#message').html(message);
         }

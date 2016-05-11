@@ -56,10 +56,11 @@ router.post('/:filename/query/1', function(req, res, next) {
       return;
     }
     var T = req.body.T;
-    var found = false;
 
+
+    // traverse the suffix tree from the root node as far as possible
     var index = 0;
-    var key = file.D[ T[index] ][0];
+    var encryptedTuple = file.D[ T[index] ][0];
     var children = file.D[ T[index] ][1];
     while (index < T.length) {
       var brake = false;
@@ -68,7 +69,7 @@ router.post('/:filename/query/1', function(req, res, next) {
           var decrypted = decrypt(children[i].substring(0, 32), IV_s, T[j]);
           if (decrypted in file.D) {
             index = j;
-            key = file.D[ decrypted ][0];
+            encryptedTuple = file.D[ decrypted ][0];
             children = file.D[ decrypted ][1];
             brake = true;
           }
@@ -79,10 +80,7 @@ router.post('/:filename/query/1', function(req, res, next) {
       if (!brake) break;
     }
 
-    var encryptedTuple = key;
-
-    res.send({ success: true, found: true,
-               message: 'Substring found :D',
+    res.send({ success: true,
                encryptedTuple: encryptedTuple,
                C_length: file.C.length,
                L_length: file.L.length });
