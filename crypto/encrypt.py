@@ -9,7 +9,7 @@ from Crypto.Cipher import AES
 import hashlib
 import random
 import string
-
+from strgen import StringGenerator
 import prp
 
 parser = argparse.ArgumentParser()
@@ -31,16 +31,21 @@ BS = 16
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS) 
 unpad = lambda s : s[0:-ord(s[-1])]
 
-K_1 = 'This is a key789' * 2
-K_2 = 'This is a key173' * 2
-K_3 = 'This is a key987' * 2
-K_4 = 'This is a key191' * 2
-K_D = 'This is a key123' * 2
-K_C = 'This is a key234' * 2
-K_L = 'This is a key777' * 2
-IV_D = 'This is an IV456'
-IV_C = 'This is an IV567'
-IV_L = 'This is an IV777'
+longKeyGen = StringGenerator('[a-zA-Z0-9_]{272}').render()
+
+K_1 = longKeyGen[0:32]
+K_2 = longKeyGen[32:64]
+K_3 = longKeyGen[64:96]
+K_4 = longKeyGen[96:128]
+K_D = longKeyGen[128:160]
+K_C = longKeyGen[160:192]
+K_L = longKeyGen[192:224]
+IV_D = longKeyGen[224:240]
+IV_C = longKeyGen[240:256]
+IV_L = longKeyGen[256:272]
+
+print("Save this key! You will not be able to make queries to your file without this key: " + longKeyGen)
+print("\n")
 
 filename = args.filename
 
