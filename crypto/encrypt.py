@@ -23,9 +23,9 @@ def getIndexOfInnerNode(node, length):
   return length - len(node.pathLabel) + 1
 
 def F(key, plaintext):
-  keyHash = hashlib.sha256(key.encode()).hexdigest()
-  ptxtHash = hashlib.sha256(plaintext.encode()).hexdigest()
-  return hashlib.sha256((ptxtHash + keyHash).encode()).hexdigest()
+  keyHash = hashlib.sha256(key).hexdigest()
+  ptxtHash = hashlib.sha256(plaintext).hexdigest()
+  return hashlib.sha256((ptxtHash + keyHash)).hexdigest()
 
 BS = 16
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS) 
