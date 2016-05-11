@@ -56,7 +56,6 @@ router.post('/:filename/query/1', function(req, res, next) {
       return;
     }
     var T = req.body.T;
-    // var encryptedTuple = '';
     var found = false;
 
     var index = 0;
@@ -95,17 +94,13 @@ router.post('/:filename/query/2', function(req, res, next) {
   var filename = req.params.filename;
   var startIndex = Number(req.body.startIndex);
   var length = Number(req.body.length);
-  console.log('start index: ' + startIndex);
-  console.log('length: ' + length);
   File.findOne({ 'username': user.username, 'filename': filename },
                function(err, file) {
     if (err || file == null) {
-      console.log('file not found');
       res.send({ success: false, message: 'File not found!' });
       return;
     }
     if (startIndex + length > file.C.length) {
-      console.log('too long');
       res.send({ success: false, message: 'Substring does not exist' });
       return;
     }
@@ -115,9 +110,6 @@ router.post('/:filename/query/2', function(req, res, next) {
     for (var i = 0; i < C_inds.length; ++i) {
       C.push(file.C[ C_inds[i] ]);
     }
-    console.log('success, sending C');
-
-    console.log('constructing sub-array');
 
     var leafPos = Number(req.body.leafPos);
     var numLeaves = Number(req.body.numLeaves);
