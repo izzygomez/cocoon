@@ -1,4 +1,4 @@
-var sjcl = require('sjcl');
+var sjcl = require('../public/js/sjcl');
 
 sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."]()
 
