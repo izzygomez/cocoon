@@ -30,7 +30,7 @@ def getIndexOfInnerNode(node, length):
     node = node.firstChild
   return length - len(node.pathLabel) + 1
 
-longKeyGen = StringGenerator('[a-zA-Z0-9_]{272}').render()
+longKeyGen = StringGenerator('[a-zA-Z0-9_]{416}').render()
 
 K_1  = longKeyGen[  0: 32]
 K_2  = longKeyGen[ 32: 64]
@@ -42,6 +42,14 @@ K_L  = longKeyGen[192:224]
 IV_D = longKeyGen[224:240]
 IV_C = longKeyGen[240:256]
 IV_L = longKeyGen[256:272]
+
+K_MAC_D  = longKeyGen[272:304]
+K_MAC_C  = longKeyGen[304:336]
+K_MAC_L  = longKeyGen[336:368]
+IV_MAC_D = longKeyGen[368:384]
+IV_MAC_C = longKeyGen[384:400]
+IV_MAC_L = longKeyGen[400:416]
+
 
 print('Save this key! You will not be able to make queries to your file without this key: ' + longKeyGen)
 print('\n')
@@ -71,7 +79,8 @@ for leaf in st.leaves:
   together = index + "---" + leafpos + "---" + num_leaves
 
   value = AES_Enc(K_D, IV_D, together)
-  D[key] = (value, [])
+  mac = CBC_MAC(K_MAC_D, IV_MAC_D, value)
+  D[key] = ([value, mac], [])
 
 print '\tProcessing inner nodes...'
 max_degree = 0
@@ -90,6 +99,7 @@ for innerNode in st.innerNodes:
   together = index + "---" + leafpos + "---" + num_leaves
 
   value = AES_Enc(K_D, IV_D, together)
+  mac = CBC_MAC(K_MAC_D, IV_MAC_D, value)
 
   child = innerNode.firstChild
   child_list = []
@@ -97,7 +107,8 @@ for innerNode in st.innerNodes:
     path_label = child.pathLabel
     child_list.append(PRF(K_2, path_label[:len(innerNode.pathLabel)+1]))
     child = child.next
-  D[key] = (value, child_list)
+
+  D[key] = ([value, mac], child_list)
 
   if max_degree < len(child_list):
     max_degree = len(child_list)
@@ -106,14 +117,18 @@ print 'done'
 print 'constructing C...'
 C = [None] * (len(st.string) - 1)
 for i, c in enumerate(st.string[:-1]):
-  C[i] = AES_Enc(K_C, IV_C, c)
+  enc = AES_Enc(K_C, IV_C, c)
+  mac = CBC_MAC(K_MAC_C, IV_MAC_C, enc)
+  C[i] = [enc, mac]
 print '\tdone'
 
 print 'constructing L...'
 L = [None] * len(st.string)
 for leaf in st.leaves:
   index = str(length - len(leaf.pathLabel) + 1)
-  L[leaf.erdex] = AES_Enc(K_L, IV_L, index)
+  enc = AES_Enc(K_L, IV_L, index)
+  mac = CBC_MAC(K_MAC_L, IV_MAC_L, enc)
+  L[leaf.erdex] = [enc, mac]
 print '\tdone'
 
 print 'adding dummy nodes...'
@@ -127,7 +142,8 @@ for i in xrange(len(D), 2 * len(st.string)):
   together = dummy_index + "---" + leafpos + "---" + num_leaves
 
   value = AES_Enc(K_D, IV_D, together)
-  D[key] = (value, [])
+  mac = CBC_MAC(K_MAC_D, IV_MAC_D, value)
+  D[key] = ([value, mac], [])
 print '\tdone'
 
 print 'adding dummy node children entries...'
@@ -138,9 +154,6 @@ for key in D:
     D[key][1].append(PRF(K_2, rand_string))
 print '\tdone'
 
-
-# THIS IMPLEMENTS PERMUTING C AND L
-# UNCOMMENT WHEN READY
 print 'permuting C...'
 C_p = [None] * (2 ** int(math.ceil(math.log(len(C), 2))))
 for i in xrange(len(C)):
@@ -149,7 +162,9 @@ for i in xrange(len(C)):
 for i in xrange(len(C), len(C_p)):
   p_i = prp.permuteSecure(i, len(C_p), K_3)
   c = random.choice(string.ascii_letters)
-  C_p[p_i] = AES_Enc(K_C, IV_C, c)
+  enc = AES_Enc(K_C, IV_C, c)
+  mac = CBC_MAC(K_MAC_C, IV_MAC_C, enc)
+  C_p[p_i] = [enc, mac]
 print '\tdone'
 
 print 'permuting L...'
@@ -159,7 +174,9 @@ for i in xrange(len(L)):
   L_p[p_i] = L[i]
 for i in xrange(len(L), len(L_p)):
   p_i = prp.permuteSecure(i, len(L_p), K_4)
-  L_p[p_i] = AES_Enc(K_L, IV_L, str(i))
+  enc = AES_Enc(K_L, IV_L, str(i))
+  mac = CBC_MAC(K_MAC_L, IV_MAC_L, enc)
+  L_p[p_i] = [enc, mac]
 print '\tdone'
 
 print 'saving to file...'
@@ -169,10 +186,12 @@ with open('ciphertext.txt', 'w') as fout:
     fout.write(json.dumps({key: D[key]}) + '\n')
   fout.write(str(len(C_p)) + '\n')
   for c in C_p:
-    fout.write(c + '\n')
+    fout.write(json.dumps(c) + '\n')
+    # fout.write(c + '\n')
   fout.write(str(len(L_p)) + '\n')
   for l in L_p:
-    fout.write(l + '\n')
+    fout.write(json.dumps(l) + '\n')
+    # fout.write(l + '\n')
 print 'DONE'
 
 # # to parse ciphertext
