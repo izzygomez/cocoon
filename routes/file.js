@@ -62,8 +62,6 @@ router.post('/:filename/query/1', function(req, res, next) {
     var index = 0;
     var key = file.D[ T[index] ][0];
     var children = file.D[ T[index] ][1];
-    console.log(children.length);
-    console.log(children);
     while (index < T.length) {
       var brake = false;
       for (var j = index + 1; j < T.length; ++j) {
