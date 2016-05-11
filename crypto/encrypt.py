@@ -13,6 +13,9 @@ import string
 from strgen import StringGenerator
 import prp
 
+from crypto import PRF, CBC_MAC, AES_Enc, AES_Dec, \
+                   permuteSecure, unpermuteSecure
+
 random.seed(time.time())
 
 parser = argparse.ArgumentParser()
@@ -27,43 +30,23 @@ def getIndexOfInnerNode(node, length):
     node = node.firstChild
   return length - len(node.pathLabel) + 1
 
-def F(key, plaintext):
-  keyHash = hashlib.sha256(key).hexdigest()
-  ptxtHash = hashlib.sha256(plaintext).hexdigest()
-  return hashlib.sha256((ptxtHash + keyHash)).hexdigest()
-
-BS = 16
-pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS) 
-unpad = lambda s : s[0:-ord(s[-1])]
-
 longKeyGen = StringGenerator('[a-zA-Z0-9_]{272}').render()
 
-K_1 = longKeyGen[0:32]
-K_2 = longKeyGen[32:64]
-K_3 = longKeyGen[64:96]
-K_4 = longKeyGen[96:128]
-K_D = longKeyGen[128:160]
-K_C = longKeyGen[160:192]
-K_L = longKeyGen[192:224]
+K_1  = longKeyGen[  0: 32]
+K_2  = longKeyGen[ 32: 64]
+K_3  = longKeyGen[ 64: 96]
+K_4  = longKeyGen[ 96:128]
+K_D  = longKeyGen[128:160]
+K_C  = longKeyGen[160:192]
+K_L  = longKeyGen[192:224]
 IV_D = longKeyGen[224:240]
 IV_C = longKeyGen[240:256]
 IV_L = longKeyGen[256:272]
 
-print("Save this key! You will not be able to make queries to your file without this key: " + longKeyGen)
-print("\n")
+print('Save this key! You will not be able to make queries to your file without this key: ' + longKeyGen)
+print('\n')
 
 filename = args.filename
-
-# key = 'This is a key12 This is a key12 '
-# text = 'string of size16'
-# iv = 'This is an IV456'
-# aes = AES.new(key, AES.MODE_CBC, iv)
-# ciphertext = aes.encrypt(pad(text))
-# ciphertext = base64.b64encode(ciphertext)
-#
-# aes = AES.new(key, AES.MODE_CBC, iv)
-# plaintext = aes.decrypt(base64.b64decode(ciphertext))
-# print unpad(plaintext)
 
 st = None
 length = None
@@ -80,17 +63,14 @@ for leaf in st.leaves:
   leafPL = leaf.pathLabel[:len(leaf.pathLabel)-1] + '$'
   parentPL = leaf.parent.pathLabel
   initPath = leafPL[:len(parentPL)+1]
-  key = F(K_1, initPath)
+  key = PRF(K_1, initPath)
 
   index = str(length - len(leaf.pathLabel) + 1)
   leafpos = str(leaf.erdex)
   num_leaves = str(leaf.numLeaves)
   together = index + "---" + leafpos + "---" + num_leaves
 
-  aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
-  raw = aes_D.encrypt(pad(together))
-  value = base64.b64encode(raw)
-
+  value = AES_Enc(K_D, IV_D, together)
   D[key] = (value, [])
 
 print '\tProcessing inner nodes...'
@@ -100,24 +80,22 @@ for innerNode in st.innerNodes:
     nodePL = innerNode.pathLabel
     parentPL = innerNode.parent.pathLabel
     initPath = nodePL[:len(parentPL)+1]
-    key = F(K_1, initPath)
+    key = PRF(K_1, initPath)
   else:
-    key = F(K_1, innerNode.pathLabel)
+    key = PRF(K_1, innerNode.pathLabel)
 
   index = str(getIndexOfInnerNode(innerNode, length))
   leafpos = str(innerNode.erdex)
   num_leaves = str(innerNode.numLeaves)
   together = index + "---" + leafpos + "---" + num_leaves
 
-  aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
-  raw = aes_D.encrypt(pad(together))
-  value = base64.b64encode(raw)
+  value = AES_Enc(K_D, IV_D, together)
 
   child = innerNode.firstChild
   child_list = []
   while child:
     path_label = child.pathLabel
-    child_list.append(F(K_2, path_label[:len(innerNode.pathLabel)+1]))
+    child_list.append(PRF(K_2, path_label[:len(innerNode.pathLabel)+1]))
     child = child.next
   D[key] = (value, child_list)
 
@@ -128,36 +106,27 @@ print 'done'
 print 'constructing C...'
 C = [None] * (len(st.string) - 1)
 for i, c in enumerate(st.string[:-1]):
-  aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
-  raw = aes_C.encrypt(pad(c))
-  value = base64.b64encode(raw)
-  C[i] = value
+  C[i] = AES_Enc(K_C, IV_C, c)
 print '\tdone'
 
 print 'constructing L...'
 L = [None] * len(st.string)
 for leaf in st.leaves:
   index = str(length - len(leaf.pathLabel) + 1)
-  aes_L = AES.new(K_L, AES.MODE_CBC, IV_L)
-  raw = aes_L.encrypt(pad(index))
-  value = base64.b64encode(raw)
-  L[leaf.erdex] = value
+  L[leaf.erdex] = AES_Enc(K_L, IV_L, index)
 print '\tdone'
 
 print 'adding dummy nodes...'
 for i in xrange(len(D), 2 * len(st.string)):
   dummyIPL =  ''.join(random.choice(string.lowercase) for i in xrange(32)) + '$'
-  key = F(K_1, dummyIPL)
+  key = PRF(K_1, dummyIPL)
 
   dummy_index = '-' + str(random.uniform(0, len(st.string)))
   leafpos = str(random.uniform(0, len(L)))
   num_leaves = str(random.uniform(0, max_degree))
   together = dummy_index + "---" + leafpos + "---" + num_leaves
 
-  aes_D = AES.new(K_D, AES.MODE_CBC, IV_D)
-  raw = aes_D.encrypt(pad(together))
-  value = base64.b64encode(raw)
-
+  value = AES_Enc(K_D, IV_D, together)
   D[key] = (value, [])
 print '\tdone'
 
@@ -166,7 +135,7 @@ ndummy = max(0, min(args.ndummy, max_degree))
 for key in D:
   for i in xrange(ndummy - len(D[key][1])):
     rand_string = ''.join(random.choice(string.lowercase) for i in xrange(32))
-    D[key][1].append(F(K_2, rand_string))
+    D[key][1].append(PRF(K_2, rand_string))
 print '\tdone'
 
 
@@ -184,7 +153,7 @@ print '\tdone'
 #   raw = aes_C.encrypt(pad(c))
 #   C_p[p_i] = base64.b64encode(raw)
 # print '\tdone'
-
+# 
 # # print 'permuting L...'
 # L_p = [None] * (2 ** int(math.ceil(math.log(len(L), 2))))
 # for i in xrange(len(L)):
