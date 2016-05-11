@@ -1,7 +1,7 @@
 var express = require('express');
 var schemas = require('../models/schemas');
 var crypto = require('./crypto');
-var sjcl = require('sjcl');
+var sjcl = require('../public/js/sjcl');
 var router = express.Router();
 
 var User = schemas.User;
@@ -84,7 +84,9 @@ router.post('/:filename/query/1', function(req, res, next) {
 
     res.send({ success: true, found: true,
                message: 'Substring found :D',
-               encryptedTuple: encryptedTuple });
+               encryptedTuple: encryptedTuple,
+               C_length: file.C.length,
+               L_length: file.L.length });
   });
 });
 
@@ -107,23 +109,28 @@ router.post('/:filename/query/2', function(req, res, next) {
       res.send({ success: false, message: 'Substring does not exist' });
       return;
     }
+
+    var C_inds = req.body.C_inds;
     var C = [];
-    for (var i = 0; i < length; ++i) {
-      C.push(file.C[i + startIndex]);
+    for (var i = 0; i < C_inds.length; ++i) {
+      C.push(file.C[ C_inds[i] ]);
     }
     console.log('success, sending C');
 
     console.log('constructing sub-array');
 
-    //constructs lead subArray containing the possible ocurrences. Assumes that
-    //the leaf array will be named file.L
-
     var leafPos = Number(req.body.leafPos);
     var numLeaves = Number(req.body.numLeaves);
     var subL = file.L.slice(leafPos, leafPos + numLeaves);
 
+    var L_inds = req.body.L_inds;
+    L = [];
+    for (var i = 0; i < L_inds.length; ++i) {
+      L.push(file.L[ L_inds[i] ]);
+    }
+
     res.send({ success: true, message: 'Returning C',
-               C: C, index: startIndex, subL: subL });
+               C: C, index: startIndex, subL: subL, L: L });
   });
 });
 

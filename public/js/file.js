@@ -49,6 +49,11 @@ $(document).ready(function() {
 
     var keyString = $('#key').val();
 
+    if (keyString.length != 272) {
+      $('#message').html('Error: The key you entered is invalid.');
+      return;
+    }
+
     K_1 = keyString.substring(0,32);
     K_2 = keyString.substring(32,64);
     IV_s = 'This is an IV000';
@@ -60,10 +65,6 @@ $(document).ready(function() {
       T.push(encrypt(key, IV_s, ctxt));
     }
 
-    console.log(T);
-    console.log(queryString);
-    console.log(filename);
-    console.log('hi');
     $.ajax({
       url: '/file/' + filename + '/query/1',
       type: 'POST',
@@ -76,10 +77,12 @@ $(document).ready(function() {
         if (success) {
           var found = data.found;
           if (found) {
+            var C_length = Number(data.C_length);
+            var L_length = Number(data.L_length);
             console.log('success!');
             console.log(message);
             $('#message').html(message);
-            round2(data.encryptedTuple);
+            round2(data.encryptedTuple, C_length, L_length);
           } else {
             $('#message').html(message);
           }
@@ -93,13 +96,15 @@ $(document).ready(function() {
     });
   };
 
-  function round2(encryptedTuple) {
+  function round2(encryptedTuple, C_length, L_length) {
     console.log('round 2 of communication protocol');
 
     var keyString = $('#key').val();
-    K_D = keyString.substring(128,160);
-    IV_s = 'This is an IV000';
-    IV_D = keyString.substring(224,240);
+    var K_D = keyString.substring(128,160);
+    var IV_s = 'This is an IV000';
+    var IV_D = keyString.substring(224,240);
+    var K_3 = keyString.substring(64, 96);
+    var K_4 = keyString.substring(96, 128);
 
     var filename = $('#filename').html();
 
@@ -112,9 +117,15 @@ $(document).ready(function() {
     var leafPos = values[1];
     var numLeaves = values[2];
 
-    console.log('startIndex: ' + startIndex);
-    console.log('leafPos: ' + leafPos);
-    console.log('numLeaves: ' + numLeaves);
+    var C_inds = [];
+    for (var i = 0; i < length; ++i) {
+      C_inds.push(securePermute(Number(startIndex) + i, C_length, K_3));
+    }
+
+    var L_inds = [];
+    for (var i = 0; i < numLeaves; ++i) {
+      L_inds.push(securePermute(Number(leafPos) + i, L_length, K_4));
+    }
 
     $.ajax({
       url: '/file/' + filename + '/query/2',
@@ -123,7 +134,9 @@ $(document).ready(function() {
         startIndex: startIndex,
         length: length,
         leafPos: leafPos,
-        numLeaves: numLeaves
+        numLeaves: numLeaves,
+        C_inds: C_inds,
+        L_inds: L_inds
       },
       success: function(data) {
         var success = data.success;
@@ -133,10 +146,9 @@ $(document).ready(function() {
           var subL = data.subL;
           console.log('success!');
           console.log(message);
-          console.log("C: ", C);
-          console.log("subL:", subL);
           $('#message').html(message);
-          round3(C, data.index, data.subL);
+          var L = data.L;
+          round3(C, data.index, data.subL, L);
         } else {
           console.log("no success RIP");
           $('#message').html(message);
@@ -148,7 +160,7 @@ $(document).ready(function() {
     });
   };
 
-  function round3(C, index, subL) {
+  function round3(C, index, subL, L) {
     console.log('check whether strings match');
 
     var keyString = $('#key').val();
@@ -161,22 +173,21 @@ $(document).ready(function() {
     var queryString = $('#query').val();
     var length = queryString.length;
 
+    console.log('C: ' + C);
+
     var decryptedC = '';
     for (var i = 0; i < length; ++i) {
       decryptedC += decrypt(K_C, IV_C, C[i]);
     }
-    console.log('queryString: \'' + queryString + "\'");
-    console.log('decryptedC: \'' + decryptedC + "\'");
-    if (queryString == decryptedC) {
+
+    if (queryString == decryptedC) { //if (queryString == decryptedC) {
       console.log('strings match :D');
 
       var decryptedIndices = ""; //If the first one matches, then all match.
 
-      for (var i = 0; i < subL.length; i++) {
-        //Decrypt all possible indices and send the response back
-        var currentIndex = decrypt(K_L, IV_L, subL[i]);
+      for (var i = 0; i < L.length; i++) {
+        var currentIndex = decrypt(K_L, IV_L, L[i]);
         decryptedIndices = decryptedIndices.concat(currentIndex + ", ");
-
       }
 
       decryptedIndices = decryptedIndices.slice(0,-2); // eww, trailing commas
