@@ -119,9 +119,6 @@ router.post('/:filename/query/2', function(req, res, next) {
 
     console.log('constructing sub-array');
 
-    //constructs lead subArray containing the possible ocurrences. Assumes that
-    //the leaf array will be named file.L
-
     var leafPos = Number(req.body.leafPos);
     var numLeaves = Number(req.body.numLeaves);
     var subL = file.L.slice(leafPos, leafPos + numLeaves);

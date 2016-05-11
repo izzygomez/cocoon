@@ -65,10 +65,6 @@ $(document).ready(function() {
       T.push(encrypt(key, IV_s, ctxt));
     }
 
-    console.log(T);
-    console.log(queryString);
-    console.log(filename);
-    console.log('hi');
     $.ajax({
       url: '/file/' + filename + '/query/1',
       type: 'POST',
@@ -177,21 +173,20 @@ $(document).ready(function() {
     var queryString = $('#query').val();
     var length = queryString.length;
 
+    console.log('C: ' + C);
+
     var decryptedC = '';
     for (var i = 0; i < length; ++i) {
       decryptedC += decrypt(K_C, IV_C, C[i]);
     }
-    console.log('queryString: \'' + queryString + "\'");
-    console.log('decryptedC: \'' + decryptedC + "\'");
-    if (queryString == decryptedC) {
+
+    if (queryString == decryptedC) { //if (queryString == decryptedC) {
       console.log('strings match :D');
 
       var decryptedIndices = ""; //If the first one matches, then all match.
 
       for (var i = 0; i < L.length; i++) {
-        //Decrypt all possible indices and send the response back
         var currentIndex = decrypt(K_L, IV_L, L[i]);
-        console.log('currentIndex: ' + currentIndex);
         decryptedIndices = decryptedIndices.concat(currentIndex + ", ");
       }
 
