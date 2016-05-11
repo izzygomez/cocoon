@@ -1,7 +1,7 @@
 var express = require('express');
 var schemas = require('../models/schemas');
 var crypto = require('./crypto');
-var sjcl = require('sjcl');
+var sjcl = require('../public/js/sjcl');
 var router = express.Router();
 
 var User = schemas.User;
