@@ -105,8 +105,8 @@ for innerNode in st.innerNodes:
   child = innerNode.firstChild
   child_list = []
   while child:
-    path_label = child.pathLabel[:-1] + '$'
-    child_list.append(F(K_2, path_label[:len(innerNode.pathLabel)-1]))
+    path_label = child.pathLabel
+    child_list.append(F(K_2, path_label[:len(innerNode.pathLabel)+1]))
     child = child.next
   D[key] = (value, child_list)
 print 'done'
