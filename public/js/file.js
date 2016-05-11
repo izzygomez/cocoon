@@ -48,13 +48,13 @@ $(document).ready(function() {
 
     var keyString = $('#key').val();
 
-    if (keyString.length != 272) {
+    if (keyString.length != 416) {
       $('#message').html('Error: The key you entered is invalid.');
       return;
     }
 
-    K_1 = keyString.substring(0,32);
-    K_2 = keyString.substring(32,64);
+    K_1 = keyString.substring(0, 32);
+    K_2 = keyString.substring(32, 64);
     IV_s = 'This is an IV000';
 
     var T = [ F(K_1, '') ];
@@ -95,18 +95,29 @@ $(document).ready(function() {
 
   function round2(encryptedTuple, C_length, L_length) {
     var keyString = $('#key').val();
-    var K_D = keyString.substring(128,160);
-    var IV_s = 'This is an IV000';
-    var IV_D = keyString.substring(224,240);
     var K_3 = keyString.substring(64, 96);
     var K_4 = keyString.substring(96, 128);
+    var K_D = keyString.substring(128, 160);
+    var IV_D = keyString.substring(224, 240);
+    var IV_s = 'This is an IV000';
 
     var filename = $('#filename').html();
 
     var queryString = $('#query').val();
     var length = queryString.length;
 
-    var decryptedTuple = decrypt(K_D, IV_D, encryptedTuple);
+    // authenticate
+    var K_MAC_D = keyString.substring(272, 304);
+    var IV_MAC_D = keyString.substring(368, 384);
+    if (CBC_MAC(K_MAC_D, IV_MAC_D, encryptedTuple[0]) != encryptedTuple[1]) {
+      console.log(encryptedTuple[0]);
+      console.log(encrypt(K_MAC_D, IV_MAC_D, encryptedTuple[0]));
+      console.log(encryptedTuple[1]);
+      $('#message').html('CBC-MAC failed! (1)');
+      return;
+    }
+
+    var decryptedTuple = decrypt(K_D, IV_D, encryptedTuple[0]);
     var values = decryptedTuple.split('---');
     var startIndex = values[0];
     var leafPos = values[1];
@@ -126,7 +137,6 @@ $(document).ready(function() {
       url: '/file/' + filename + '/query/2',
       type: 'POST',
       data: {
-        startIndex: startIndex,
         length: length,
         leafPos: leafPos,
         numLeaves: numLeaves,
@@ -137,11 +147,10 @@ $(document).ready(function() {
         var success = data.success;
         var message = data.message;
         if (success) {
-          var C = data.C;
-          var subL = data.subL;
           $('#message').html(message);
+          var C = data.C;
           var L = data.L;
-          round3(C, data.index, data.subL, L);
+          round3(C, L);
         } else {
           $('#message').html(message);
         }
@@ -152,26 +161,44 @@ $(document).ready(function() {
     });
   };
 
-  function round3(C, index, subL, L) {
+  function round3(C, L) {
     var keyString = $('#key').val();
-    K_C = keyString.substring(160,192);
-    K_L = keyString.substring(192,224);
+    K_C = keyString.substring(160, 192);
+    K_L = keyString.substring(192, 224);
+    IV_C = keyString.substring(240, 256);
+    IV_L = keyString.substring(256, 272);
     IV_s = 'This is an IV000';
-    IV_C = keyString.substring(240,256);
-    IV_L = keyString.substring(256,272);
 
     var queryString = $('#query').val();
     var length = queryString.length;
 
+    // authenticate
+    var K_MAC_C = keyString.substring(304, 336);
+    var IV_MAC_C = keyString.substring(384, 400);
+    for (var i = 0; i < C.length; ++i) {
+      if (CBC_MAC(K_MAC_C, IV_MAC_C, C[i][0]) != C[i][1]) {
+        $('message').html('CBC-MAC failed! (2)');
+        return;
+      }
+    }
+    var K_MAC_L = keyString.substring(336, 368);
+    var IV_MAC_L = keyString.substring(400, 416);
+    for (var i = 0; i < L.length; ++i) {
+      if (CBC_MAC(K_MAC_L, IV_MAC_L, L[i][0]) != L[i][1]) {
+        $('message').html('CBC-MAC failed! (3)');
+        return;
+      }
+    }
+
     var decryptedC = '';
-    for (var i = 0; i < length; ++i) {
-      decryptedC += decrypt(K_C, IV_C, C[i]);
+    for (var i = 0; i < C.length; ++i) {
+      decryptedC += decrypt(K_C, IV_C, C[i][0]);
     }
 
     if (queryString == decryptedC) {
       var decryptedIndices = "";
       for (var i = 0; i < L.length; i++) {
-        var currentIndex = decrypt(K_L, IV_L, L[i]);
+        var currentIndex = decrypt(K_L, IV_L, L[i][0]);
         decryptedIndices = decryptedIndices.concat(currentIndex + ", ");
       }
       decryptedIndices = decryptedIndices.slice(0,-2);

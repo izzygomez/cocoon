@@ -92,16 +92,11 @@ router.post('/:filename/query/1', function(req, res, next) {
 router.post('/:filename/query/2', function(req, res, next) {
   var user = req.session.currentUser;
   var filename = req.params.filename;
-  var startIndex = Number(req.body.startIndex);
   var length = Number(req.body.length);
   File.findOne({ 'username': user.username, 'filename': filename },
                function(err, file) {
     if (err || file == null) {
       res.send({ success: false, message: 'File not found!' });
-      return;
-    }
-    if (startIndex + length > file.C.length) {
-      res.send({ success: false, message: 'Substring does not exist' });
       return;
     }
 
@@ -111,10 +106,6 @@ router.post('/:filename/query/2', function(req, res, next) {
       C.push(file.C[ C_inds[i] ]);
     }
 
-    var leafPos = Number(req.body.leafPos);
-    var numLeaves = Number(req.body.numLeaves);
-    var subL = file.L.slice(leafPos, leafPos + numLeaves);
-
     var L_inds = req.body.L_inds;
     L = [];
     for (var i = 0; i < L_inds.length; ++i) {
@@ -122,7 +113,7 @@ router.post('/:filename/query/2', function(req, res, next) {
     }
 
     res.send({ success: true, message: 'Returning C',
-               C: C, index: startIndex, subL: subL, L: L });
+               C: C, L: L });
   });
 });
 
