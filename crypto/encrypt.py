@@ -149,9 +149,7 @@ for i in xrange(len(C)):
 for i in xrange(len(C), len(C_p)):
   p_i = prp.permuteSecure(i, len(C_p), K_3)
   c = random.choice(string.ascii_letters)
-  aes_C = AES.new(K_C, AES.MODE_CBC, IV_C)
-  raw = aes_C.encrypt(pad(c))
-  C_p[p_i] = base64.b64encode(raw)
+  C_p[p_i] = AES_Enc(K_C, IV_C, c)
 print '\tdone'
 
 print 'permuting L...'
@@ -161,9 +159,7 @@ for i in xrange(len(L)):
   L_p[p_i] = L[i]
 for i in xrange(len(L), len(L_p)):
   p_i = prp.permuteSecure(i, len(L_p), K_4)
-  aes_L = AES.new(K_L, AES.MODE_CBC, IV_L)
-  raw = aes_L.encrypt(pad(str(i)))
-  L_p[p_i] = base64.b64encode(raw)
+  L_p[p_i] = AES_Enc(K_L, IV_L, str(i))
 print '\tdone'
 
 print 'saving to file...'
