@@ -126,9 +126,11 @@ $(document).ready(function() {
 
     // if C decrypted is not equal to the query, then the query is not
     // a subset of the stored string
-    var queryString
-    if (decryptedC != queryString) {
-      $('message').html('String not found!');
+    var queryString = $('#query').val();
+    if (decryptedC !== queryString) {
+      console.log('iiii');
+      $('#message').html('String not found!');
+      return;
     }
 
     // if C decrypted is equal to the query, then the query is a substring!
