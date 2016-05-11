@@ -2,22 +2,6 @@ $(document).ready(function() {
 
   sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."]();
 
-  K_1 = 'This is a key789';
-  K_2 = 'This is a key173';
-  K_D = 'This is a key123';
-  K_C = 'This is a key234';
-  K_L = 'This is a key777';
-  K_1 += K_1;
-  K_2 += K_2;
-  K_D += K_D;
-  K_C += K_C;
-  K_L += K_L;
-
-  IV_s = 'This is an IV000';
-  IV_D = 'This is an IV456';
-  IV_C = 'This is an IV567';
-  IV_L = 'This is an IV777';
-
   function F(key, plaintext) {
     var key_hash_bit = sjcl.hash.sha256.hash(key);
     var key_hash = sjcl.codec.hex.fromBits(key_hash_bit);
@@ -62,6 +46,13 @@ $(document).ready(function() {
   function round1() {
     var queryString = $('#query').val();
     var filename = $('#filename').html();
+
+    var keyString = $('#key').val();
+
+    K_1 = keyString.substring(0,32);
+    K_2 = keyString.substring(32,64);
+    IV_s = 'This is an IV000';
+
     var T = [ F(K_1, '') ];
     for (var i = 0; i < queryString.length; i++) {
       var key = F(K_2, queryString.substring(0, i + 1)).substring(0, 32);
@@ -104,6 +95,11 @@ $(document).ready(function() {
 
   function round2(encryptedTuple) {
     console.log('round 2 of communication protocol');
+
+    var keyString = $('#key').val();
+    K_D = keyString.substring(128,160);
+    IV_s = 'This is an IV000';
+    IV_D = keyString.substring(224,240);
 
     var filename = $('#filename').html();
 
@@ -154,6 +150,14 @@ $(document).ready(function() {
 
   function round3(C, index, subL) {
     console.log('check whether strings match');
+
+    var keyString = $('#key').val();
+    K_C = keyString.substring(160,192);
+    K_L = keyString.substring(192,224);
+    IV_s = 'This is an IV000';
+    IV_C = keyString.substring(240,256);
+    IV_L = keyString.substring(256,272);
+
     var queryString = $('#query').val();
     var length = queryString.length;
 
