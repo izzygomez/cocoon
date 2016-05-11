@@ -131,10 +131,6 @@ $(document).ready(function() {
       L_inds.push(securePermute(Number(leafPos) + i, L_length, K_4));
     }
 
-    console.log('startIndex: ' + startIndex);
-    console.log('leafPos: ' + leafPos);
-    console.log('numLeaves: ' + numLeaves);
-
     $.ajax({
       url: '/file/' + filename + '/query/2',
       type: 'POST',
@@ -154,10 +150,9 @@ $(document).ready(function() {
           var subL = data.subL;
           console.log('success!');
           console.log(message);
-          console.log("C: ", C);
-          console.log("subL:", subL);
           $('#message').html(message);
-          round3(C, data.index, data.subL);
+          var L = data.L;
+          round3(C, data.index, data.subL, L);
         } else {
           console.log("no success RIP");
           $('#message').html(message);
@@ -169,7 +164,7 @@ $(document).ready(function() {
     });
   };
 
-  function round3(C, index, subL) {
+  function round3(C, index, subL, L) {
     console.log('check whether strings match');
 
     var keyString = $('#key').val();
@@ -193,11 +188,11 @@ $(document).ready(function() {
 
       var decryptedIndices = ""; //If the first one matches, then all match.
 
-      for (var i = 0; i < subL.length; i++) {
+      for (var i = 0; i < L.length; i++) {
         //Decrypt all possible indices and send the response back
-        var currentIndex = decrypt(K_L, IV_L, subL[i]);
+        var currentIndex = decrypt(K_L, IV_L, L[i]);
+        console.log('currentIndex: ' + currentIndex);
         decryptedIndices = decryptedIndices.concat(currentIndex + ", ");
-
       }
 
       decryptedIndices = decryptedIndices.slice(0,-2); // eww, trailing commas

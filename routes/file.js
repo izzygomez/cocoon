@@ -86,7 +86,7 @@ router.post('/:filename/query/1', function(req, res, next) {
                message: 'Substring found :D',
                encryptedTuple: encryptedTuple,
                C_length: file.C.length,
-               L_length: file.L_length });
+               L_length: file.L.length });
   });
 });
 
@@ -126,8 +126,14 @@ router.post('/:filename/query/2', function(req, res, next) {
     var numLeaves = Number(req.body.numLeaves);
     var subL = file.L.slice(leafPos, leafPos + numLeaves);
 
+    var L_inds = req.body.L_inds;
+    L = [];
+    for (var i = 0; i < L_inds.length; ++i) {
+      L.push(file.L[ L_inds[i] ]);
+    }
+
     res.send({ success: true, message: 'Returning C',
-               C: C, index: startIndex, subL: subL });
+               C: C, index: startIndex, subL: subL, L: L });
   });
 });
 
