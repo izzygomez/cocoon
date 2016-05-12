@@ -90,7 +90,7 @@ def unpermute(permutedIndex, inputSize, key):
   else:
     leftHalf = paddedPermutedIndex[:bitLength/2 + 1]
     rightHalf = paddedPermutedIndex[bitLength/2 + 1:]
-    leftRandom = hashBinary(leftHalf[:bitLength/2], key, bitLength/2)
+    leftRandom = hashBinary(leftHalf[:bitLength/2+1], key, bitLength/2)
     rightHalf = int(rightHalf, 2)
     leftRandom = int(leftRandom, 2)
     leftXor = leftRandom ^ rightHalf
@@ -109,3 +109,7 @@ def unpermuteSecure(permutedIndex, inputSize, key):
   secondRound = unpermute(firstRound, inputSize, key)
   thirdRound = unpermute(secondRound, inputSize, key)
   return thirdRound
+
+
+test = permuteSecure(5, 9, 'a')
+print unpermuteSecure(test, 9, 'a')
