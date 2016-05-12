@@ -56,6 +56,11 @@ router.post('/', function(req, res, next) {
       var message = 'Only text file uploads are supported.';
       res.render('upload', { user: true, message: message });
     } else {
+      if (req.file.size > 15 * 1000 * 1000) {
+        var message = 'Files larger than 15 MB are not supported.';
+        res.render('upload', { user: true, message: message });
+        return;
+      }
       User.findOne({ 'username': user.username }, function(err, currentuser) {
         if (err) {
           var message = 'Error uploading file. Username not found.';
