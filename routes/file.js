@@ -61,26 +61,38 @@ router.post('/:filename/query/1', function(req, res, next) {
       return;
     }
 
-    // traverse the suffix tree from the root node as far as possible
-    var index = 0;
-    var encryptedTuple = file.D[ T[index] ][0];
-    var children = file.D[ T[index] ][1];
-    while (index < T.length) {
-      var brake = false;
-      for (var j = index + 1; j < T.length; ++j) {
-        for (var i = 0; i < children.length; ++i) {
-          var decrypted = decrypt(children[i].substring(0, 32), IV_s, T[j]);
-          if (decrypted in file.D) {
-            index = j;
-            encryptedTuple = file.D[ decrypted ][0];
-            children = file.D[ decrypted ][1];
-            brake = true;
+    // if the root node is not found, then the client key is wrong
+    if (!(T[0] in file.D)) {
+      res.send({ success: false, message: 'The key is incorrect!' });
+      return;
+    }
+
+    try {
+      // traverse the suffix tree from the root node as far as possible
+      var index = 0;
+      if (file.D[ T[index] ].length != 2) throw "Error";
+      var encryptedTuple = file.D[ T[index] ][0];
+      var children = file.D[ T[index] ][1];
+      while (index < T.length) {
+        var brake = false;
+        for (var j = index + 1; j < T.length; ++j) {
+          for (var i = 0; i < children.length; ++i) {
+            var decrypted = decrypt(children[i].substring(0, 32), IV_s, T[j]);
+            if (decrypted in file.D) {
+              if (file.D[ decrypted ].length != 2) throw "Error";
+              index = j;
+              encryptedTuple = file.D[ decrypted ][0];
+              children = file.D[ decrypted ][1];
+              brake = true;
+            }
+            if (brake) break;
           }
           if (brake) break;
         }
-        if (brake) break;
+        if (!brake) break;
       }
-      if (!brake) break;
+    } catch (e) {
+      res.send({ success: false, message: 'The ciphertext is corrupted.' });
     }
 
     res.send({ success: true,
