@@ -49,9 +49,6 @@ IV_MAC_D = longKeyGen[368:384]
 IV_MAC_C = longKeyGen[384:400]
 IV_MAC_L = longKeyGen[400:416]
 
-print('Save this key! You will not be able to make queries to your file without this key: ' + longKeyGen)
-print('\n')
-
 filename = args.filename
 
 st = None
@@ -188,7 +185,12 @@ with open('ciphertext.txt', 'w') as fout:
   fout.write(str(len(L_p)) + '\n')
   for l in L_p:
     fout.write(json.dumps(l) + '\n')
-print 'DONE'
+print 'DONE\n'
+
+print 'Save this key! You will not be able to make queries to your file without it.'
+print 'Key:', longKeyGen
+print
+
 
 # # to parse ciphertext
 # D2 = {}

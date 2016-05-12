@@ -35,6 +35,14 @@ Install Node modules
 npm install
 ```
 
+To encrypt a plaintext file
+---------------------------
+```bash
+cd crypto
+python encrypt.py -f [path-to-file]
+```
+The ciphertext will be saved as ``ciphertext.txt``, in the same directory that you ran ``encrypt.py`` from.
+
 To run the server locally
 -------------------------
 Start MongoDB in a separate terminal window:
