@@ -31,6 +31,17 @@
         <br>
         <button class="btn btn-default" type="submit" value="Upload" name="submit">Upload</button>
         <p>{{message}}</p>
+
+        <script type="text/javascript">
+        $('#ciphertextFile').bind('change', function() {
+          var size = this.files[0].size/1024/1024;
+          if (size > 15) {
+            this.value = "";
+            alert('This file size is: ' + size + "MB. This is too big! Please upload a ciphertext <= 15 MB");
+          }
+        });
+        </script>
+
       </form>
     </div>
 
