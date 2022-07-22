@@ -2,6 +2,8 @@
 ===========================
 Cocoon is a web storage application which allows users to query substring searches on their encrypted data.
 
+See our [presentation](docs/presentation.pptx) & [writeup](docs/writeup.pdf).
+
 Setup (Linux)
 -------------
 Clone the repository
@@ -56,4 +58,4 @@ Run the server
 npm start
 ```
 
-You can now use the web app at localhost:3000.
+You can now use the web app at `localhost:3000`.
